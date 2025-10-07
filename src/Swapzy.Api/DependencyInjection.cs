@@ -1,0 +1,22 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using Swapzy.Application;
+using Swapzy.Core;
+using Swapzy.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Swapzy.Api
+{
+    public static class DependencyInjection
+    {
+        public static IServiceCollection AddAppDI(this IServiceCollection services)
+        {
+            services.AddApplicationDI()
+                    .AddInfrastructureDI();
+            return services;
+        }
+    }
+}
