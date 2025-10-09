@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Swapzy.Application;
-using Swapzy.Core;
 using Swapzy.Infrastructure;
 using System;
 using System.Collections.Generic;
