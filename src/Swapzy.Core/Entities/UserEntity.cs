@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Swapzy.Core.Entities
 {
-    public class User : BaseAuditableEntity
+    public class UserEntity : BaseAuditableEntity
     {
         public Guid Id {  get; set; }
         public required string Name { get; set; }

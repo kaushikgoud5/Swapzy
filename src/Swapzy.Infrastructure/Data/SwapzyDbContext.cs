@@ -13,6 +13,6 @@ namespace Swapzy.Infrastructure.Data
         public SwapzyDbContext(DbContextOptions<SwapzyDbContext> options) : base(options)
         {
         }
-        public DbSet<User> Users { get; set; }
+        public DbSet<UserEntity> Users { get; set; }
     }
 }
