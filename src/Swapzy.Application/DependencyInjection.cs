@@ -12,6 +12,7 @@ namespace Swapzy.Application
         public static IServiceCollection AddApplicationDI(this IServiceCollection services)
         {
             // Add your core services here
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
             return services;
         }
     }
