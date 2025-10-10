@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Swapzy.Application;
-using Swapzy.Core;
 using Swapzy.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -12,10 +11,10 @@ namespace Swapzy.Api
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddAppDI(this IServiceCollection services)
+        public static IServiceCollection AddAppDI(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddApplicationDI()
-                    .AddInfrastructureDI();
+                    .AddInfrastructureDI(configuration);
             return services;
         }
     }
