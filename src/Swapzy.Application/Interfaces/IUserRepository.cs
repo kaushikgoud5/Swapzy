@@ -1,4 +1,5 @@
-﻿using Swapzy.Core.Entities;
+﻿using Swapzy.Application.Commands.RegisterUser;
+using Swapzy.Core.Entities;
 
 namespace Swapzy.Application.Interfaces
 {
@@ -6,6 +7,5 @@ namespace Swapzy.Application.Interfaces
     {
         Task<UserEntity?> GetByEmailAsync(string email);
         Task<UserEntity> AddAsync(UserEntity user);
-
     }
 }

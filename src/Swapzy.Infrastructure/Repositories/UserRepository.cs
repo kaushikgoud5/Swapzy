@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Swapzy.Application.Commands.RegisterUser;
 using Swapzy.Application.Interfaces;
 using Swapzy.Core.Entities;
 using Swapzy.Infrastructure.Data;

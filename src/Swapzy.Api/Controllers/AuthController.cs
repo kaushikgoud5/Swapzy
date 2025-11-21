@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swapzy.Application.Commands;
+using Swapzy.Application.Commands.LoginUser;
+using Swapzy.Application.Commands.RegisterUser;
 using Swapzy.Core.Entities;
 
 namespace Swapzy.Api.Controllers
@@ -16,10 +18,16 @@ namespace Swapzy.Api.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<UserEntity> Post([FromBody] UserEntity user)
+        [HttpPost("register")]
+        public async Task<Guid> Register([FromBody] RegisterUserDto user)
         {
-            return await _mediator.Send(new PostUserCommand(user));
+            return await _mediator.Send(new RegisterUserCommand(user));
         }
+
+        [HttpPost("login")]
+        public async Task<string> Login([FromBody] LoginUserDto loginUserDto)
+        { 
+            return  await _mediator.Send(new LoginUserCommand(loginUserDto));
+		}
     }
 }
