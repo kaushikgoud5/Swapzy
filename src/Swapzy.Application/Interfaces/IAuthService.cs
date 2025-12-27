@@ -1,4 +1,6 @@
-﻿using Swapzy.Core.Entities;
+﻿using Swapzy.Application.DTO_S;
+using Swapzy.Application.DTOs;
+using Swapzy.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +11,8 @@ namespace Swapzy.Application.Interfaces
 {
     public interface IAuthService
     {
-        string HashPassword(string password);
-        bool VerifyPassword(string password, string passwordHash);
-        string GenerateJwtToken(UserEntity user);
+        Task<Guid> RegisterAsync(RegisterUserDto dto);
+        Task<string> LoginAsync(LoginUserDto dto);
     }
     
 }

@@ -1,5 +1,4 @@
-﻿using Swapzy.Application.Commands.RegisterUser;
-using Swapzy.Core.Entities;
+﻿using Swapzy.Core.Entities;
 
 namespace Swapzy.Application.Interfaces
 {

@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Swapzy.Application.Interfaces;
+using Swapzy.Application.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +15,7 @@ namespace Swapzy.Application
         {
             // Add your core services here
             services.AddAutoMapper(typeof(DependencyInjection).Assembly);
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+            services.AddScoped<IAuthService, AuthService>();
             return services;
         }
     }
