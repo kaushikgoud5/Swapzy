@@ -31,8 +31,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Swapzy.Application\Swapzy.Application.csproj" />
-    <ProjectReference Include="..\src\Swapzy.Core\Swapzy.Core.csproj" />
-    <ProjectReference Include="..\src\Swapzy.Infrastructure\Swapzy.Infrastructure.csproj" />
+    <ProjectReference Include="..\Swapzy.Application\Swapzy.Application.csproj" />
+    <ProjectReference Include="..\Swapzy.Core\Swapzy.Core.csproj" />
+    <ProjectReference Include="..\Swapzy.Infrastructure\Swapzy.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

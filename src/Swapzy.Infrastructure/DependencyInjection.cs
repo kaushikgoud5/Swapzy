@@ -6,12 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Swapzy.Application.Interfaces;
 using Swapzy.Infrastructure.Data;
 using Swapzy.Infrastructure.Repositories;
-using Swapzy.Infrastructure.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Swapzy.Infrastructure
 {
@@ -19,30 +14,30 @@ namespace Swapzy.Infrastructure
     {
         public static IServiceCollection AddInfrastructureDI(this IServiceCollection services, IConfiguration configuration)
         {
-			// Add your infrastructure services here
-			var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
-			services.AddAuthentication(options =>
-			{
-				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-			})
-			.AddJwtBearer(options =>
-			{
-				options.TokenValidationParameters = new TokenValidationParameters
-				{
-					ValidateIssuer = true,
-					ValidateAudience = true,
-					ValidateLifetime = true,
-					ValidateIssuerSigningKey = true,
-					ValidIssuer = configuration["Jwt:Issuer"],
-					ValidAudience = configuration["Jwt:Audience"],
-					IssuerSigningKey = new SymmetricSecurityKey(key)
-				};
-			});
-			services.AddDbContext<SwapzyDbContext>(options =>
+            // Add your infrastructure services here
+            var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+            });
+            services.AddDbContext<SwapzyDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<IUserRepository, UserRepository>();
-			return services;
+            return services;
         }
     }
 }
