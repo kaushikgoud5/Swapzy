@@ -3,31 +3,28 @@ using Amazon.Lambda.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Swapzy.Application.DTOs;
 using Swapzy.Application.Interfaces;
-using Swapzy.Lambda.Functions;
 using System.Text.Json;
 
-namespace Swapzy.Lambda
+namespace Swapzy.Lambda.Functions
 {
-    public class RegisterUserLambda : LambdaBase
+    public class LoginUserLambda : LambdaBase
     {
-        public async Task<APIGatewayProxyResponse> Handle(
-        APIGatewayProxyRequest request,
+        public async Task<APIGatewayProxyResponse> Handle(APIGatewayProxyRequest request,
         ILambdaContext context)
         {
             return await ExecuteAsync(async sp =>
             {
                 var authService = sp.GetRequiredService<IAuthService>();
-                var dto = JsonSerializer.Deserialize<RegisterUserDto>(request.Body);
-                var userId = await authService.RegisterAsync(dto);
-
+                var loginDto = JsonSerializer.Deserialize<LoginUserDto>(request.Body);
+                var respone = await authService.LoginAsync(loginDto);
                 return new APIGatewayProxyResponse
                 {
                     StatusCode = 200,
-                    Body = JsonSerializer.Serialize(userId),
+                    Body = JsonSerializer.Serialize(respone),
                     Headers = new Dictionary<string, string>
-                {
-                    { "Content-Type", "application/json" }
-                }
+                    {
+                        { "Content-Type", "application/json" }
+                    }
                 };
             }, context);
         }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Swapzy.Core.Entities
+namespace Swapzy.Core.Common
 {
     public class BaseAuditableEntity
     {

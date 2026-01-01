@@ -1,5 +1,4 @@
-﻿using Swapzy.Application.DTO_S;
-using Swapzy.Application.DTOs;
+﻿using Swapzy.Application.DTOs;
 using Swapzy.Core.Entities;
 using System;
 using System.Collections.Generic;

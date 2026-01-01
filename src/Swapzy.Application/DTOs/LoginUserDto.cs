@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Swapzy.Application.DTO_S
+namespace Swapzy.Application.DTOs
 {
     public class LoginUserDto
     {
@@ -12,3 +12,4 @@ namespace Swapzy.Application.DTO_S
         public string Password { get; set; }
     }
 }
+    

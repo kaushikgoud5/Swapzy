@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Swapzy.Application.DTOs;
-using Swapzy.Core.Entities;
+using Swapzy.Core.Entities.Users;
 
 namespace Swapzy.Application.Mappings
 {
@@ -8,14 +8,14 @@ namespace Swapzy.Application.Mappings
     {
         public MappingProfile()
         {
-         //   UserMappings();
+            UserMappings();
         }
 
-/*        private void UserMappings()
+        private void UserMappings()
         {
             this.CreateMap<RegisterUserDto, UserEntity>()
                 .ForMember(dest => dest.HashedPassword, opt => opt.Ignore())
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Username));
-        }*/
+        }
     }
 }

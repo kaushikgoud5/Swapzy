@@ -1,4 +1,4 @@
-﻿using Swapzy.Core.Entities;
+﻿using Swapzy.Core.Entities.Users;
 
 namespace Swapzy.Application.Interfaces
 {

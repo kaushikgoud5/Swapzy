@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Swapzy.Application.Interfaces;
-using Swapzy.Core.Entities;
+using Swapzy.Core.Entities.Users;
 using Swapzy.Infrastructure.Data;
 
 namespace Swapzy.Infrastructure.Repositories

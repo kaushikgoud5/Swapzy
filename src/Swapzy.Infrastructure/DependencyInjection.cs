@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Swapzy.Application.Interfaces;
 using Swapzy.Infrastructure.Data;
 using Swapzy.Infrastructure.Repositories;
+using Swapzy.Infrastructure.Services;
 using System.Text;
 
 namespace Swapzy.Infrastructure
@@ -36,7 +37,10 @@ namespace Swapzy.Infrastructure
             });
             services.AddDbContext<SwapzyDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            services.AddSingleton<IConfiguration>(configuration);
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+
             return services;
         }
     }

@@ -12,15 +12,15 @@ using Swapzy.Infrastructure.Data;
 namespace Swapzy.Infrastructure.Migrations
 {
     [DbContext(typeof(SwapzyDbContext))]
-    [Migration("20251016165843_InitialCreat-1")]
-    partial class InitialCreat1
+    [Migration("20251230104302_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
