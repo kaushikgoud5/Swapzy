@@ -1,13 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Swapzy.Application.Interfaces;
-using Swapzy.Application.Services;
 using Swapzy.Core.Entities.Users;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Swapzy.Application
 {
@@ -17,7 +11,7 @@ namespace Swapzy.Application
         {
             // Add your core services here
             services.AddAutoMapper(typeof(DependencyInjection).Assembly);
-            services.AddScoped<IAuthService, AuthService>();
+            //services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<
                 Microsoft.AspNetCore.Identity.IPasswordHasher<UserEntity>,
                 PasswordHasher<UserEntity>>();

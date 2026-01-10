@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Swapzy.Application.DTOs;
+using Swapzy.Application.DTOs.Requests;
 using Swapzy.Core.Entities.Users;
 
 namespace Swapzy.Application.Mappings
@@ -13,7 +13,7 @@ namespace Swapzy.Application.Mappings
 
         private void UserMappings()
         {
-            this.CreateMap<RegisterUserDto, UserEntity>()
+            this.CreateMap<RegisterRequestDto, UserEntity>()
                 .ForMember(dest => dest.HashedPassword, opt => opt.Ignore())
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Username));
         }

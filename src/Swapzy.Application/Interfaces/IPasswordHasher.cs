@@ -6,6 +6,5 @@ namespace Swapzy.Application.Interfaces
     {
         string Hash(string password);
         bool Verify(string password, string hash);
-        string GenerateJwtToken(UserEntity user);
     }
 }

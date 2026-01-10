@@ -12,10 +12,7 @@ namespace Swapzy.Core.Entities.Authorization
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
-        public bool IsSystemRole { get; set; }
-        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public string? Description { get; set; }
         public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
-        public ICollection<RoleScope> RoleScopes { get; set; } = new List<RoleScope>();
     }
 }

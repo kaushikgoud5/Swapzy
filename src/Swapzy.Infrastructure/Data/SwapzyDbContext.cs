@@ -10,27 +10,29 @@ namespace Swapzy.Infrastructure.Data
         {
         }
         public DbSet<UserEntity> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<UserRole>()
-                .HasKey(x => new { x.UserId, x.RoleId });
-
             modelBuilder.Entity<RolePermission>()
-                .HasKey(x => new { x.RoleId, x.PermissionId });
+                .HasKey(rp => new { rp.RoleId, rp.PermissionId });
 
-            modelBuilder.Entity<RoleScope>()
-                .HasKey(x => new { x.RoleId, x.ScopeId });
+            modelBuilder.Entity<Role>()
+                .HasIndex(r => r.Name)
+                .IsUnique();
 
             modelBuilder.Entity<Permission>()
-                .HasIndex(x => x.Code)
+                .HasIndex(p => p.Name)
                 .IsUnique();
 
-            modelBuilder.Entity<Scope>()
-                .HasIndex(x => x.Name)
-                .IsUnique();
+            modelBuilder.Entity<UserRole>()
+                    .HasKey(x => new { x.UserId, x.RoleId });
+
         }
-
     }
 
 }

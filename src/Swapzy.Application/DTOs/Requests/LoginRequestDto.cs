@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Swapzy.Application.DTOs
+namespace Swapzy.Application.DTOs.Requests
 {
-    public class LoginUserDto
+    public class LoginRequestDto
     {
         public string Email { get; set; }
         public string Password { get; set; }

@@ -11,7 +11,7 @@ namespace Swapzy.Core.Entities.Authorization
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
-        public string Description { get; set; }
+        public string? Description  { get; set; }
         public ICollection<RoleScope> RoleScopes { get; set; } = new List<RoleScope>();
 
     }

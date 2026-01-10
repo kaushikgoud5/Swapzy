@@ -10,10 +10,11 @@ namespace Swapzy.Core.Entities.Authorization
 {
     public class AuthorizationPolicy : BaseAuditableEntity
     {
-        public long PermissionId { get; set; }
+        public Guid Id { get; set; }
+        public Guid PermissionId { get; set; }
         public Permission Permission { get; set; } = default!;
 
-        public ResourceType ResourceType { get; set; } = default!; 
+        public string ResourceType { get; set; } = default!; 
         public RelationshipRule RelationshipRule { get; set; }
 
         public bool IsActive { get; set; } = true;

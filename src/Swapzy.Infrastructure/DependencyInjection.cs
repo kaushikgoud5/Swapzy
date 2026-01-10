@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Swapzy.Application.Interfaces;
+using Swapzy.Application.Services;
 using Swapzy.Infrastructure.Data;
 using Swapzy.Infrastructure.Repositories;
 using Swapzy.Infrastructure.Services;
@@ -35,11 +36,15 @@ namespace Swapzy.Infrastructure
                     IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
+
             services.AddDbContext<SwapzyDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.AddSingleton<IConfiguration>(configuration);
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             return services;
         }

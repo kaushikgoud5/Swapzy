@@ -10,7 +10,7 @@ namespace Swapzy.Lambda.Functions
         static LambdaBase()
         {
             var configuration = new ConfigurationBuilder()
-                    .AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"),optional: false)
+                    .AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"), optional: false)
                     .AddEnvironmentVariables()
                     .Build();
 

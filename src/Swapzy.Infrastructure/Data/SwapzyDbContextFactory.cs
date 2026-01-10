@@ -10,7 +10,7 @@ public class SwapzyDbContextFactory
         var optionsBuilder = new DbContextOptionsBuilder<SwapzyDbContext>();
 
         optionsBuilder.UseSqlServer(
-            "Server = (localdb)\\MSSQLLocalDB; Database = SwapzyDB ; Trusted_Connection = True ; MultipleActiveResultSets=True; TrustServerCertificate=True;"
+            "Server = (localdb)\\MSSQLLocalDB; Database = SwapzyDb_V1 ; Trusted_Connection = True ; MultipleActiveResultSets=True; TrustServerCertificate=True;"
         );
 
         return new SwapzyDbContext(optionsBuilder.Options);

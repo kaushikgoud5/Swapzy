@@ -1,15 +1,19 @@
-﻿using System;
+﻿using Swapzy.Core.Constants.Authorization;
+using Swapzy.Core.Entities.Authorization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Swapzy.Application.DTOs
+namespace Swapzy.Application.DTOs.Requests
 {
-    public class RegisterUserDto
+    public class RegisterRequestDto
     {
         public string Email { get; set; }
         public string Password { get; set; }
         public string Username { get; set; }
+
+        public string Role = Roles.User;
     }
 }
