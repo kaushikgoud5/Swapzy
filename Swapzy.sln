@@ -13,6 +13,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swapzy.Infrastructure", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swapzy.Lambda", "src\Swapzy.Lambda\Swapzy.Lambda.csproj", "{A95F10A2-8DC5-42EC-6940-29E07F2CD720}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "database", "database", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StoredProcedures", "StoredProcedures", "{8FA6D900-0E99-45D8-8926-239D48CF5F26}"
+	ProjectSection(SolutionItems) = preProject
+		sp_seed_authorization_data.sql = sp_seed_authorization_data.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +87,7 @@ Global
 		{9BEFE558-2129-4981-8D44-17E2185FEB62} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{6681575C-8B89-441B-BFCE-069D8AE527F4} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{A95F10A2-8DC5-42EC-6940-29E07F2CD720} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{8FA6D900-0E99-45D8-8926-239D48CF5F26} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DD5C8337-180D-422D-BC87-88B924A44B72}
