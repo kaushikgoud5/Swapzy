@@ -52,6 +52,9 @@ namespace Swapzy.Lambda
             services.AddScoped<IPasswordHasher<UserEntity>,PasswordHasher<UserEntity>>();
             services.AddDistributedMemoryCache();
             services.AddLogging();
+            services.AddScoped<IAuthMiddleware, JwtAuthMiddleware>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<ICategoryService, CategoryService>();
         }
     }
 }

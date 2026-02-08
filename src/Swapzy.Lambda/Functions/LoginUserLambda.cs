@@ -3,6 +3,7 @@ using Amazon.Lambda.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Swapzy.Application.DTOs.Requests;
 using Swapzy.Application.Interfaces;
+using Swapzy.Lambda.Functions.Base;
 using System.Text.Json;
 
 namespace Swapzy.Lambda.Functions
@@ -12,7 +13,8 @@ namespace Swapzy.Lambda.Functions
         public async Task<APIGatewayProxyResponse> Handle(APIGatewayProxyRequest request,
         ILambdaContext context)
         {
-            return await ExecuteAsync(async sp =>
+            return await ExecuteAsync(request, context,
+                async (sp,_) =>
             {
                 var authService = sp.GetRequiredService<IAuthService>();
                 var loginDto = JsonSerializer.Deserialize<LoginRequestDto>(request.Body);
@@ -26,7 +28,7 @@ namespace Swapzy.Lambda.Functions
                         { "Content-Type", "application/json" }
                     }
                 };
-            }, context);
+            }, false);
         }
     }
 }

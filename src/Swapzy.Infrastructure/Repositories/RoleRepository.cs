@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Swapzy.Application.Interfaces;
 using Swapzy.Core.Entities.Authorization;
-using Swapzy.Core.Entities.Users;
 using Swapzy.Infrastructure.Data;
 
 namespace Swapzy.Infrastructure.Repositories
@@ -20,8 +19,6 @@ namespace Swapzy.Infrastructure.Repositories
             return await _context.Roles
                 .FirstOrDefaultAsync(r => r.Name.ToLower() == name.ToLower());
         }
-
-
 
         public async Task<List<Role>> GetUserRolesAsync(Guid userId)
         {

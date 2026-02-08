@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Swapzy.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Swapzy.Infrastructure.Data;
 namespace Swapzy.Infrastructure.Migrations
 {
     [DbContext(typeof(SwapzyDbContext))]
-    partial class SwapzyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260207115416_Products-Categories")]
+    partial class ProductsCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

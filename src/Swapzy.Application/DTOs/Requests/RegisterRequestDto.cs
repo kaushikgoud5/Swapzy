@@ -1,10 +1,4 @@
 ﻿using Swapzy.Core.Constants.Authorization;
-using Swapzy.Core.Entities.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Swapzy.Application.DTOs.Requests
 {

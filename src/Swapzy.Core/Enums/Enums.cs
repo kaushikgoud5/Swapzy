@@ -18,4 +18,11 @@ namespace Swapzy.Core.Enums
         User,
         Category,
     }
+    public enum ProductStatus
+    {
+        Available,
+        Swapped,
+        Unavailable
+    }
 }
+
