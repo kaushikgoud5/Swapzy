@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StoredProcedures", "StoredProcedures", "{8FA6D900-0E99-45D8-8926-239D48CF5F26}"
 	ProjectSection(SolutionItems) = preProject
 		sp_seed_authorization_data.sql = sp_seed_authorization_data.sql
+		sp_seed_categories.sql = sp_seed_categories.sql
 	EndProjectSection
 EndProject
 Global
