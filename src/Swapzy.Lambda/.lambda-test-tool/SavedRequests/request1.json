@@ -1,9 +1,0 @@
-{
-  "httpMethod": "POST",
-  "path": "/api/auth/register",
-  "headers": {
-    "Content-Type": "application/json"
-  },
-  "Body": "{ \"Email\": \"user@example.com\", \"Password\": \"P@ssw0rd123\", \"Username\": \"kaushikg\" }",
-  "IsBase64Encoded": false
-}

@@ -1,5 +1,0 @@
-{
-  "httpMethod": "POST",
-  "path": "/auth/login",
-  "body": "{\"email\":\"test@example.com\",\"password\":\"Test@1234\"}"
-}
