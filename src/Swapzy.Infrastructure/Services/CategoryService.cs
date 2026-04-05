@@ -3,6 +3,7 @@ using Swapzy.Application.DTOs.Requests;
 using Swapzy.Application.DTOs.Responses;
 using Swapzy.Application.Interfaces;
 using Swapzy.Core.Entities.Categories;
+using Swapzy.Core.Exceptions;
 
 namespace Swapzy.Infrastructure.Services
 {
@@ -25,7 +26,7 @@ namespace Swapzy.Infrastructure.Services
 
             if (await _categoryRepository.SlugExistsAsync(dto.Slug))
             {
-                throw new InvalidOperationException($"Category with slug '{dto.Slug}' already exists.");
+                throw new ConflictException($"Category with slug '{dto.Slug}' already exists.");
             }
 
             if (dto.ParentCategoryId.HasValue)
@@ -33,7 +34,7 @@ namespace Swapzy.Infrastructure.Services
                 var parentCategory = await _categoryRepository.GetByIdAsync(dto.ParentCategoryId.Value);
                 if (parentCategory == null)
                 {
-                    throw new InvalidOperationException($"Parent category with ID {dto.ParentCategoryId} not found.");
+                    throw new NotFoundException($"Parent category with ID {dto.ParentCategoryId} not found.");
                 }
             }
 
@@ -83,14 +84,14 @@ namespace Swapzy.Infrastructure.Services
             var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null)
             {
-                throw new InvalidOperationException($"Category with ID {id} not found.");
+                throw new NotFoundException($"Category with ID {id} not found.");
             }
 
             if (!string.IsNullOrEmpty(dto.Slug) && dto.Slug != category.Slug)
             {
                 if (await _categoryRepository.SlugExistsAsync(dto.Slug, id))
                 {
-                    throw new InvalidOperationException($"Category with slug '{dto.Slug}' already exists.");
+                    throw new ConflictException($"Category with slug '{dto.Slug}' already exists.");
                 }
                 category.Slug = dto.Slug.ToLower();
             }
@@ -108,13 +109,13 @@ namespace Swapzy.Infrastructure.Services
             {
                 if (dto.ParentCategoryId == id)
                 {
-                    throw new InvalidOperationException("Category cannot be its own parent.");
+                    throw new BadRequestException("Category cannot be its own parent.");
                 }
 
                 var parentCategory = await _categoryRepository.GetByIdAsync(dto.ParentCategoryId.Value);
                 if (parentCategory == null)
                 {
-                    throw new InvalidOperationException($"Parent category with ID {dto.ParentCategoryId} not found.");
+                    throw new NotFoundException($"Parent category with ID {dto.ParentCategoryId} not found.");
                 }
                 category.ParentCategoryId = dto.ParentCategoryId;
             }
@@ -133,13 +134,13 @@ namespace Swapzy.Infrastructure.Services
             var productCount = await _categoryRepository.GetProductCountAsync(id);
             if (productCount > 0)
             {
-                throw new InvalidOperationException($"Cannot delete category with {productCount} associated products.");
+                throw new ConflictException($"Cannot delete category with {productCount} associated products.");
             }
 
             var subCategories = await _categoryRepository.GetSubCategoriesAsync(id);
             if (subCategories.Any())
             {
-                throw new InvalidOperationException("Cannot delete category with subcategories.");
+                throw new ConflictException("Cannot delete category with subcategories.");
             }
 
             _logger.LogInformation("Deleting category: {CategoryId} by user: {UserId}", id, userId);
@@ -151,7 +152,7 @@ namespace Swapzy.Infrastructure.Services
             var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null)
             {
-                throw new InvalidOperationException($"Category with ID {id} not found.");
+                throw new NotFoundException($"Category with ID {id} not found.");
             }
 
             category.IsActive = !category.IsActive;

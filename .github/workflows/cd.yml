@@ -1,0 +1,30 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment: production
+
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          curl -sf "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+            || (echo "Deploy hook failed" && exit 1)
+
+      - name: Deployment summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY

@@ -11,6 +11,8 @@ namespace Swapzy.Core.Entities.Users
         public required string Email { get; set; }
         public required string HashedPassword { get; set; }
         public string? PhoneNumber { get; set; }
+        public bool IsOnboarded { get; set; } = false;
+        public UserProfile? Profile { get; set; }
         public ICollection<UserPreferredCategory> PreferredCategories { get; set; } = new List<UserPreferredCategory>();
         public ICollection<Product> Products { get; set; } = new List<Product>();
     }

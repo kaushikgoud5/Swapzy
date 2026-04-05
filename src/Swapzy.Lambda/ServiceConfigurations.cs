@@ -41,7 +41,7 @@ namespace Swapzy.Lambda
             });
 
             services.AddDbContext<SwapzyDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
             services.AddSingleton<IConfiguration>(configuration);
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();

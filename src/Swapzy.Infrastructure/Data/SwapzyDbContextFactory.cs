@@ -1,17 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using Swapzy.Infrastructure.Data;
 
-public class SwapzyDbContextFactory
-    : IDesignTimeDbContextFactory<SwapzyDbContext>
+public class SwapzyDbContextFactory : IDesignTimeDbContextFactory<SwapzyDbContext>
 {
     public SwapzyDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<SwapzyDbContext>();
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "..", "Swapzy.Api"))
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile("appsettings.Development.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
 
-        optionsBuilder.UseSqlServer(
-            "Server = (localdb)\\MSSQLLocalDB; Database = SwapzyDb_V1 ; Trusted_Connection = True ; MultipleActiveResultSets=True; TrustServerCertificate=True;"
-        );
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+        var optionsBuilder = new DbContextOptionsBuilder<SwapzyDbContext>();
+        optionsBuilder.UseNpgsql(connectionString);
 
         return new SwapzyDbContext(optionsBuilder.Options);
     }

@@ -4,6 +4,7 @@ using Swapzy.Application.DTOs.Requests;
 using Swapzy.Application.DTOs.Responses;
 using Swapzy.Application.Interfaces;
 using Swapzy.Core.Entities.Users;
+using Swapzy.Core.Exceptions;
 
 namespace Swapzy.Application.Services
 {
@@ -38,7 +39,7 @@ namespace Swapzy.Application.Services
             if (await _userRepository.EmailExistsAsync(dto.Email))
             {
                 _logger.LogWarning("Registration failed: Email {Email} already exists", dto.Email);
-                throw new InvalidOperationException("User with this email already exists.");
+                throw new ConflictException("User with this email already exists.");
             }
             var hashedPassword = _passwordHasher.Hash(dto.Password);
             var user = new UserEntity
@@ -50,12 +51,12 @@ namespace Swapzy.Application.Services
             var createdUser = await _userRepository.AddAsync(user);
             _logger.LogInformation("User created with ID: {UserId}", createdUser.Id);
             var userRole = await _roleRepository.GetByNameAsync(dto.Role);
-            await _userRepository.AssignRoleAsync(createdUser.Id, userRole);
             if (userRole == null)
             {
                 _logger.LogError("Role not found: {Role}", dto.Role);
-                throw new InvalidOperationException($"Role '{dto.Role}' not found.");
+                throw new BadRequestException($"Role '{dto.Role}' not found.");
             }
+            await _userRepository.AssignRoleAsync(createdUser.Id, userRole);
             _logger.LogInformation("Assigned role {Role} to user {UserId}", dto.Role, createdUser.Id);
 
             _logger.LogInformation("User {UserId} registered successfully", createdUser.Id);
@@ -72,7 +73,7 @@ namespace Swapzy.Application.Services
             if (user == null)
             {
                 _logger.LogWarning("Login failed: User not found for email {Email}", dto.Email);
-                throw new UnauthorizedAccessException("Invalid email or password");
+                throw new UnauthorizedException("Invalid email or password.");
             }
 
             // Verify password
@@ -80,7 +81,7 @@ namespace Swapzy.Application.Services
             if (!isPasswordValid)
             {
                 _logger.LogWarning("Login failed: Invalid password for user {UserId}", user.Id);
-                throw new UnauthorizedAccessException("Invalid email or password");
+                throw new UnauthorizedException("Invalid email or password.");
             }
 
             // Generate tokens
@@ -107,14 +108,14 @@ namespace Swapzy.Application.Services
             if (principal == null)
             {
                 _logger.LogWarning("Refresh token validation failed");
-                throw new UnauthorizedAccessException("Invalid refresh token");
+                throw new UnauthorizedException("Invalid refresh token.");
             }
 
             var userIdClaim = principal.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
                 _logger.LogWarning("Invalid user ID in refresh token");
-                throw new UnauthorizedAccessException("Invalid token claims");
+                throw new UnauthorizedException("Invalid token claims.");
             }
 
             // Validate refresh token exists in cache
@@ -122,7 +123,7 @@ namespace Swapzy.Application.Services
             if (!isValid)
             {
                 _logger.LogWarning("Refresh token not found or expired for user {UserId}", userId);
-                throw new UnauthorizedAccessException("Refresh token expired or revoked");
+                throw new UnauthorizedException("Refresh token expired or revoked.");
             }
 
             // Get user
@@ -130,7 +131,7 @@ namespace Swapzy.Application.Services
             if (user == null)
             {
                 _logger.LogWarning("User {UserId} not found or inactive", userId);
-                throw new UnauthorizedAccessException("User not found or inactive");
+                throw new UnauthorizedException("User not found or inactive.");
             }
 
             // Revoke old refresh token

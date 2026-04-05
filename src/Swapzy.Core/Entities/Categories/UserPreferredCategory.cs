@@ -12,9 +12,9 @@ namespace Swapzy.Core.Entities.Categories
     {
         public int Id { get; set; }
         public Guid UserId { get; set; }
-        public required UserEntity User { get; set; }
+        public UserEntity User { get; set; } = null!;
         public int CategoryId { get; set; }
-        public required Category Category { get; set; }
+        public Category Category { get; set; } = null!;
 
     }
 }

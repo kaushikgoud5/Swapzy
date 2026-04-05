@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Swapzy.Core.Entities.Authorization;
 using Swapzy.Core.Entities.Categories;
 using Swapzy.Core.Entities.Products;
@@ -21,12 +21,23 @@ namespace Swapzy.Infrastructure.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductMetadata> ProductMetadata { get; set; }
         public DbSet<ProductLocation> ProductLocations { get; set; }
+        public DbSet<UserProfile> UserProfiles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserEntity>(entity =>
             {
                 entity.HasKey(x => x.Id);
                 entity.HasIndex(x => x.Email).IsUnique();
+
+                entity.HasOne(x => x.Profile)
+                      .WithOne(x => x.User)
+                      .HasForeignKey<UserProfile>(x => x.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserProfile>(entity =>
+            {
+                entity.HasKey(x => x.UserId);
             });
             modelBuilder.Entity<RolePermission>()
                 .HasKey(rp => new { rp.RoleId, rp.PermissionId });
@@ -110,8 +121,13 @@ namespace Swapzy.Infrastructure.Data
                 entity.HasIndex(x => x.City);
                 entity.HasIndex(x => new { x.Country, x.City });
             });
+        }
 
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            // Ensure all DateTime properties are stored as UTC in PostgreSQL
+            configurationBuilder.Properties<DateTime>()
+                .HaveColumnType("timestamp with time zone");
         }
     }
-
 }
