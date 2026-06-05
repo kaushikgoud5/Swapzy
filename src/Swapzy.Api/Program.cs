@@ -6,7 +6,6 @@ using Swapzy.Api.Middleware;
 using Swapzy.Application.Interfaces;
 using Swapzy.Application.Services;
 using Swapzy.Core.Configurations;
-using Swapzy.Core.Configurations;
 using Swapzy.Core.Entities.Users;
 using Swapzy.Infrastructure.Data;
 using Swapzy.Infrastructure.Repositories;

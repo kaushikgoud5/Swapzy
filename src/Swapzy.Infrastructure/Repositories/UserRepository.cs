@@ -45,6 +45,8 @@ namespace Swapzy.Infrastructure.Repositories
 
         public async Task<UserRole?> AssignRoleAsync(Guid id, Role? role)
         {
+            if (role == null) return null;
+
             var userRole = new UserRole
             {
                 UserId = id,
