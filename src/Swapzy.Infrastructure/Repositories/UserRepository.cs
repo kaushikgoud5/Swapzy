@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Swapzy.Application.Interfaces;
 using Swapzy.Core.Entities.Authorization;
 using Swapzy.Core.Entities.Users;
@@ -13,10 +13,10 @@ namespace Swapzy.Infrastructure.Repositories
         {
             _swapzyDbContext = swapzyDbContext;
         }
+
         public async Task<UserEntity> AddAsync(UserEntity user)
         {
             _swapzyDbContext.Users.Add(user);
-            await _swapzyDbContext.SaveChangesAsync();
             return user;
         }
 
@@ -35,7 +35,6 @@ namespace Swapzy.Infrastructure.Repositories
         {
             user.ModifiedOn = DateTime.UtcNow;
             _swapzyDbContext.Users.Update(user);
-            await _swapzyDbContext.SaveChangesAsync();
         }
 
         public async Task<bool> EmailExistsAsync(string email)
@@ -44,7 +43,7 @@ namespace Swapzy.Infrastructure.Repositories
                 .AnyAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
-        public async Task<UserRole?> AssignRoleAsync(Guid id, Role role)
+        public async Task<UserRole?> AssignRoleAsync(Guid id, Role? role)
         {
             var userRole = new UserRole
             {
@@ -53,7 +52,6 @@ namespace Swapzy.Infrastructure.Repositories
                 CreatedOn = DateTime.UtcNow,
             };
             await _swapzyDbContext.UserRoles.AddAsync(userRole);
-            await _swapzyDbContext.SaveChangesAsync();
             return userRole;
         }
     }
