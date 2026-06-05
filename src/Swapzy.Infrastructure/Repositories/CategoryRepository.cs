@@ -17,7 +17,6 @@ namespace Swapzy.Infrastructure.Repositories
         public async Task<Category> AddAsync(Category category)
         {
             await _context.Categories.AddAsync(category);
-            await _context.SaveChangesAsync();
             return category;
         }
 
@@ -59,7 +58,6 @@ namespace Swapzy.Infrastructure.Repositories
         public async Task<Category> UpdateAsync(Category category)
         {
             _context.Categories.Update(category);
-            await _context.SaveChangesAsync();
             return category;
         }
 
@@ -69,7 +67,6 @@ namespace Swapzy.Infrastructure.Repositories
             if (category == null) return false;
 
             category.DateDeleted = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
             return true;
         }
 

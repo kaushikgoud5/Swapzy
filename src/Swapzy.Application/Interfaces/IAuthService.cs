@@ -13,6 +13,7 @@ namespace Swapzy.Application.Interfaces
     {
         Task<Guid> RegisterAsync(RegisterRequestDto dto);
         Task<AuthResponseDto> LoginAsync(LoginRequestDto dto);
+        Task<AuthResponseDto> SocialLoginAsync(string provider, string token);
         Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
         Task<bool> LogoutAsync(Guid userId, string refreshToken);
         Task<bool> RevokeAllTokensAsync(Guid userId);

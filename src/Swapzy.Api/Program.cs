@@ -17,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 builder.Services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+builder.Services.Configure<SocialAuthSettings>(configuration.GetSection("SocialAuth"));
 
 var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!);
 builder.Services.AddAuthentication(options =>
@@ -45,16 +46,19 @@ builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ISocialAuthService, SocialAuthService>();
+builder.Services.AddHttpClient();
 builder.Services.AddAutoMapper(typeof(Swapzy.Application.Mappings.MappingProfile).Assembly);
 
 builder.Services.AddControllers().ConfigureValidationErrors();

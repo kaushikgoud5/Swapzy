@@ -34,6 +34,13 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         return Ok(new { category = cat });
     }
 
+    [HttpGet("{id:int}/subcategories")]
+    public async Task<IActionResult> GetSubCategories(int id)
+    {
+        var categories = await categoryService.GetSubCategoriesAsync(id);
+        return Ok(new { categories });
+    }
+
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto)
@@ -41,5 +48,32 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var result = await categoryService.CreateAsync(dto, userId);
         return StatusCode(201, new { categoryId = result.Id, category = result });
+    }
+
+    [Authorize]
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDto dto)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await categoryService.UpdateAsync(id, dto, userId);
+        return Ok(new { category = result });
+    }
+
+    [Authorize]
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        await categoryService.DeleteAsync(id, userId);
+        return Ok(new { message = "Category deleted successfully." });
+    }
+
+    [Authorize]
+    [HttpPatch("{id:int}/toggle-active")]
+    public async Task<IActionResult> ToggleActive(int id)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var isActive = await categoryService.ToggleActiveStatusAsync(id, userId);
+        return Ok(new { isActive });
     }
 }

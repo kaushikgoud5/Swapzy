@@ -13,11 +13,13 @@ namespace Swapzy.Infrastructure.Services
     public class OnboardingService : IOnboardingService
     {
         private readonly SwapzyDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<OnboardingService> _logger;
 
-        public OnboardingService(SwapzyDbContext context, ILogger<OnboardingService> logger)
+        public OnboardingService(SwapzyDbContext context, IUnitOfWork unitOfWork, ILogger<OnboardingService> logger)
         {
             _context = context;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -42,6 +44,7 @@ namespace Swapzy.Infrastructure.Services
             if (validCategoryIds.Count < 3)
                 throw new BadRequestException("At least 3 valid active categories are required.");
 
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 if (user.Profile == null)
@@ -81,14 +84,15 @@ namespace Swapzy.Infrastructure.Services
                 user.IsOnboarded = true;
                 user.ModifiedOn = DateTime.UtcNow;
 
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
 
                 _logger.LogInformation("Onboarding completed for user: {UserId}", userId);
-
                 return MapToDto(user, validCategoryIds);
             }
             catch
             {
+                await _unitOfWork.RollbackTransactionAsync();
                 throw;
             }
         }

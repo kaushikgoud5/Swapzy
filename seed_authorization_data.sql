@@ -1,5 +1,7 @@
-CREATE OR REPLACE FUNCTION sp_seed_authorization_data()
-RETURNS VOID AS $$
+-- Seed Authorization Data (Roles, Permissions, RolePermissions)
+-- Run this in Supabase SQL Editor after applying EF migrations
+
+DO $$
 DECLARE
     v_utc_now TIMESTAMP WITH TIME ZONE := NOW();
     v_user_role_id UUID;
@@ -54,5 +56,4 @@ BEGIN
           AND rp."PermissionId" = p."Id"
     );
 
-END;
-$$ LANGUAGE plpgsql;
+END $$;

@@ -9,14 +9,14 @@ namespace Swapzy.Infrastructure.Services
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CategoryService> _logger;
 
         public CategoryService(
-            ICategoryRepository categoryRepository,
+            IUnitOfWork unitOfWork,
             ILogger<CategoryService> logger)
         {
-            _categoryRepository = categoryRepository;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -24,18 +24,14 @@ namespace Swapzy.Infrastructure.Services
         {
             _logger.LogInformation("Creating category with slug: {Slug}", dto.Slug);
 
-            if (await _categoryRepository.SlugExistsAsync(dto.Slug))
-            {
+            if (await _unitOfWork.Categories.SlugExistsAsync(dto.Slug))
                 throw new ConflictException($"Category with slug '{dto.Slug}' already exists.");
-            }
 
             if (dto.ParentCategoryId.HasValue)
             {
-                var parentCategory = await _categoryRepository.GetByIdAsync(dto.ParentCategoryId.Value);
+                var parentCategory = await _unitOfWork.Categories.GetByIdAsync(dto.ParentCategoryId.Value);
                 if (parentCategory == null)
-                {
                     throw new NotFoundException($"Parent category with ID {dto.ParentCategoryId} not found.");
-                }
             }
 
             var category = new Category
@@ -49,50 +45,47 @@ namespace Swapzy.Infrastructure.Services
                 CreatedOn = DateTime.UtcNow
             };
 
-            var created = await _categoryRepository.AddAsync(category);
-            _logger.LogInformation("Category created with ID: {CategoryId}", created.Id);
+            await _unitOfWork.Categories.AddAsync(category);
+            await _unitOfWork.SaveChangesAsync();
 
-            return MapToDto(created);
+            _logger.LogInformation("Category created with ID: {CategoryId}", category.Id);
+            return MapToDto(category);
         }
 
         public async Task<CategoryResponseDto?> GetByIdAsync(int id)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
             return category != null ? MapToDto(category) : null;
         }
 
         public async Task<CategoryResponseDto?> GetBySlugAsync(string slug)
         {
-            var category = await _categoryRepository.GetBySlugAsync(slug);
+            var category = await _unitOfWork.Categories.GetBySlugAsync(slug);
             return category != null ? MapToDto(category) : null;
         }
 
         public async Task<List<CategoryResponseDto>> GetAllAsync(bool includeInactive = false)
         {
-            var categories = await _categoryRepository.GetAllAsync(includeInactive);
+            var categories = await _unitOfWork.Categories.GetAllAsync(includeInactive);
             return categories.Select(MapToDto).ToList();
         }
 
         public async Task<List<CategoryResponseDto>> GetSubCategoriesAsync(int parentId)
         {
-            var categories = await _categoryRepository.GetSubCategoriesAsync(parentId);
+            var categories = await _unitOfWork.Categories.GetSubCategoriesAsync(parentId);
             return categories.Select(MapToDto).ToList();
         }
 
         public async Task<CategoryResponseDto> UpdateAsync(int id, UpdateCategoryDto dto, Guid userId)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
             if (category == null)
-            {
                 throw new NotFoundException($"Category with ID {id} not found.");
-            }
 
             if (!string.IsNullOrEmpty(dto.Slug) && dto.Slug != category.Slug)
             {
-                if (await _categoryRepository.SlugExistsAsync(dto.Slug, id))
-                {
+                if (await _unitOfWork.Categories.SlugExistsAsync(dto.Slug, id))
                     throw new ConflictException($"Category with slug '{dto.Slug}' already exists.");
-                }
                 category.Slug = dto.Slug.ToLower();
             }
 
@@ -108,60 +101,54 @@ namespace Swapzy.Infrastructure.Services
             if (dto.ParentCategoryId.HasValue && dto.ParentCategoryId != category.ParentCategoryId)
             {
                 if (dto.ParentCategoryId == id)
-                {
                     throw new BadRequestException("Category cannot be its own parent.");
-                }
 
-                var parentCategory = await _categoryRepository.GetByIdAsync(dto.ParentCategoryId.Value);
+                var parentCategory = await _unitOfWork.Categories.GetByIdAsync(dto.ParentCategoryId.Value);
                 if (parentCategory == null)
-                {
                     throw new NotFoundException($"Parent category with ID {dto.ParentCategoryId} not found.");
-                }
                 category.ParentCategoryId = dto.ParentCategoryId;
             }
 
             category.ModifiedBy = userId.ToString();
             category.ModifiedOn = DateTime.UtcNow;
 
-            var updated = await _categoryRepository.UpdateAsync(category);
-            _logger.LogInformation("Category updated: {CategoryId}", id);
+            await _unitOfWork.Categories.UpdateAsync(category);
+            await _unitOfWork.SaveChangesAsync();
 
-            return MapToDto(updated);
+            _logger.LogInformation("Category updated: {CategoryId}", id);
+            return MapToDto(category);
         }
 
         public async Task<bool> DeleteAsync(int id, Guid userId)
         {
-            var productCount = await _categoryRepository.GetProductCountAsync(id);
+            var productCount = await _unitOfWork.Categories.GetProductCountAsync(id);
             if (productCount > 0)
-            {
                 throw new ConflictException($"Cannot delete category with {productCount} associated products.");
-            }
 
-            var subCategories = await _categoryRepository.GetSubCategoriesAsync(id);
+            var subCategories = await _unitOfWork.Categories.GetSubCategoriesAsync(id);
             if (subCategories.Any())
-            {
                 throw new ConflictException("Cannot delete category with subcategories.");
-            }
 
             _logger.LogInformation("Deleting category: {CategoryId} by user: {UserId}", id, userId);
-            return await _categoryRepository.DeleteAsync(id);
+            var result = await _unitOfWork.Categories.DeleteAsync(id);
+            await _unitOfWork.SaveChangesAsync();
+            return result;
         }
 
         public async Task<bool> ToggleActiveStatusAsync(int id, Guid userId)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
             if (category == null)
-            {
                 throw new NotFoundException($"Category with ID {id} not found.");
-            }
 
             category.IsActive = !category.IsActive;
             category.ModifiedBy = userId.ToString();
             category.ModifiedOn = DateTime.UtcNow;
 
-            await _categoryRepository.UpdateAsync(category);
-            _logger.LogInformation("Category {CategoryId} active status toggled to: {IsActive}", id, category.IsActive);
+            await _unitOfWork.Categories.UpdateAsync(category);
+            await _unitOfWork.SaveChangesAsync();
 
+            _logger.LogInformation("Category {CategoryId} active status toggled to: {IsActive}", id, category.IsActive);
             return category.IsActive;
         }
 

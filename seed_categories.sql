@@ -1,5 +1,7 @@
-CREATE OR REPLACE FUNCTION sp_seed_categories()
-RETURNS VOID AS $$
+-- Seed Master Categories
+-- Run this in Supabase SQL Editor after applying EF migrations
+
+DO $$
 DECLARE
     v_now TIMESTAMP WITH TIME ZONE := NOW();
 BEGIN
@@ -22,5 +24,4 @@ BEGIN
         "IsActive"    = TRUE,
         "ModifiedOn"  = v_now;
 
-END;
-$$ LANGUAGE plpgsql;
+END $$;

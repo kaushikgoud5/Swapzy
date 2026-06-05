@@ -13,11 +13,13 @@ namespace Swapzy.Infrastructure.Services
     public class ProfileService : IProfileService
     {
         private readonly SwapzyDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ProfileService> _logger;
 
-        public ProfileService(SwapzyDbContext context, ILogger<ProfileService> logger)
+        public ProfileService(SwapzyDbContext context, IUnitOfWork unitOfWork, ILogger<ProfileService> logger)
         {
             _context = context;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -47,65 +49,72 @@ namespace Swapzy.Infrastructure.Services
             if (user.Profile == null)
                 throw new BadRequestException("Complete onboarding before editing profile.");
 
-            // Update profile fields (only if provided)
-            if (dto.AvatarUrl != null)
-                user.Profile.AvatarUrl = dto.AvatarUrl;
-
-            if (dto.DisplayName != null)
-                user.Profile.DisplayName = dto.DisplayName;
-
-            if (dto.Bio != null)
-                user.Profile.Bio = dto.Bio;
-
-            if (dto.Location != null)
+            await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                user.Profile.Country = dto.Location.Country;
-                user.Profile.State = dto.Location.State;
-                user.Profile.City = dto.Location.City;
-                user.Profile.PostalCode = dto.Location.PostalCode;
-                user.Profile.Latitude = dto.Location.Latitude;
-                user.Profile.Longitude = dto.Location.Longitude;
-            }
+                if (dto.AvatarUrl != null)
+                    user.Profile.AvatarUrl = dto.AvatarUrl;
 
-            // Update preferred categories if provided
-            if (dto.PreferredCategoryIds != null)
-            {
-                if (dto.PreferredCategoryIds.Count < 3)
-                    throw new BadRequestException("At least 3 preferred categories are required.");
+                if (dto.DisplayName != null)
+                    user.Profile.DisplayName = dto.DisplayName;
 
-                var validCategoryIds = await _context.Categories
-                    .Where(c => dto.PreferredCategoryIds.Contains(c.Id) && c.IsActive && c.DateDeleted == null)
-                    .Select(c => c.Id)
-                    .ToListAsync();
+                if (dto.Bio != null)
+                    user.Profile.Bio = dto.Bio;
 
-                if (validCategoryIds.Count < 3)
-                    throw new BadRequestException("At least 3 valid active categories are required.");
-
-                // Remove old, add new
-                var existing = user.PreferredCategories.ToList();
-                _context.UserPreferredCategories.RemoveRange(existing);
-
-                foreach (var categoryId in validCategoryIds)
+                if (dto.Location != null)
                 {
-                    _context.UserPreferredCategories.Add(new UserPreferredCategory
-                    {
-                        UserId = userId,
-                        CategoryId = categoryId,
-                        CreatedBy = userId.ToString(),
-                        CreatedOn = DateTime.UtcNow
-                    });
+                    user.Profile.Country = dto.Location.Country;
+                    user.Profile.State = dto.Location.State;
+                    user.Profile.City = dto.Location.City;
+                    user.Profile.PostalCode = dto.Location.PostalCode;
+                    user.Profile.Latitude = dto.Location.Latitude;
+                    user.Profile.Longitude = dto.Location.Longitude;
                 }
+
+                if (dto.PreferredCategoryIds != null)
+                {
+                    if (dto.PreferredCategoryIds.Count < 3)
+                        throw new BadRequestException("At least 3 preferred categories are required.");
+
+                    var validCategoryIds = await _context.Categories
+                        .Where(c => dto.PreferredCategoryIds.Contains(c.Id) && c.IsActive && c.DateDeleted == null)
+                        .Select(c => c.Id)
+                        .ToListAsync();
+
+                    if (validCategoryIds.Count < 3)
+                        throw new BadRequestException("At least 3 valid active categories are required.");
+
+                    var existing = user.PreferredCategories.ToList();
+                    _context.UserPreferredCategories.RemoveRange(existing);
+
+                    foreach (var categoryId in validCategoryIds)
+                    {
+                        _context.UserPreferredCategories.Add(new UserPreferredCategory
+                        {
+                            UserId = userId,
+                            CategoryId = categoryId,
+                            CreatedBy = userId.ToString(),
+                            CreatedOn = DateTime.UtcNow
+                        });
+                    }
+                }
+
+                user.Profile.ModifiedBy = userId.ToString();
+                user.Profile.ModifiedOn = DateTime.UtcNow;
+
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+
+                _logger.LogInformation("Profile updated for user: {UserId}", userId);
+
+                await _context.Entry(user).Collection(u => u.PreferredCategories).LoadAsync();
+                return MapToDto(user);
             }
-
-            user.Profile.ModifiedBy = userId.ToString();
-            user.Profile.ModifiedOn = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Profile updated for user: {UserId}", userId);
-
-            // Re-fetch to get updated categories
-            await _context.Entry(user).Collection(u => u.PreferredCategories).LoadAsync();
-            return MapToDto(user);
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
         }
 
         private static ProfileResponseDto MapToDto(UserEntity user)
