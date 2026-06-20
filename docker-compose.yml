@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: swapzydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  localstack:
+    image: localstack/localstack:latest
+    environment:
+      SERVICES: s3,sns,sqs
+      DEFAULT_REGION: ap-south-1
+    ports:
+      - "4566:4566"
+    volumes:
+      - "./localstack-init.sh:/etc/localstack/init/ready.d/init.sh"
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=swapzydb;Username=postgres;Password=postgres"
+      Jwt__Key: "super-secret-dev-key-change-in-production-min-32-chars!"
+      Jwt__Issuer: "SwapzyApp"
+      Jwt__Audience: "SwapzyAppUsers"
+      AWS__Region: "ap-south-1"
+      AWS__ServiceURL: "http://localstack:4566"
+      AWS__S3BucketName: "swapzy-product-images"
+      AWS__SnsTopicArn: "arn:aws:sns:ap-south-1:000000000000:swapzy-events"
+      AWS__SqsQueueUrl: "http://localstack:4566/000000000000/swapzy-notifications"
+    depends_on:
+      db:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+
+volumes:
+  pgdata:
