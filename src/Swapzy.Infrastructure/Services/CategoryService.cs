@@ -22,8 +22,6 @@ namespace Swapzy.Infrastructure.Services
 
         public async Task<CategoryResponseDto> CreateAsync(CreateCategoryDto dto, Guid userId)
         {
-            _logger.LogInformation("Creating category with slug: {Slug}", dto.Slug);
-
             if (await _unitOfWork.Categories.SlugExistsAsync(dto.Slug))
                 throw new ConflictException($"Category with slug '{dto.Slug}' already exists.");
 
@@ -48,7 +46,6 @@ namespace Swapzy.Infrastructure.Services
             await _unitOfWork.Categories.AddAsync(category);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Category created with ID: {CategoryId}", category.Id);
             return MapToDto(category);
         }
 
@@ -115,7 +112,6 @@ namespace Swapzy.Infrastructure.Services
             await _unitOfWork.Categories.UpdateAsync(category);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Category updated: {CategoryId}", id);
             return MapToDto(category);
         }
 
@@ -129,7 +125,6 @@ namespace Swapzy.Infrastructure.Services
             if (subCategories.Any())
                 throw new ConflictException("Cannot delete category with subcategories.");
 
-            _logger.LogInformation("Deleting category: {CategoryId} by user: {UserId}", id, userId);
             var result = await _unitOfWork.Categories.DeleteAsync(id);
             await _unitOfWork.SaveChangesAsync();
             return result;
@@ -148,7 +143,6 @@ namespace Swapzy.Infrastructure.Services
             await _unitOfWork.Categories.UpdateAsync(category);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Category {CategoryId} active status toggled to: {IsActive}", id, category.IsActive);
             return category.IsActive;
         }
 

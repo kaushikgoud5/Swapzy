@@ -105,8 +105,6 @@ namespace Swapzy.Infrastructure.Services
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
 
-                _logger.LogInformation("Profile updated for user: {UserId}", userId);
-
                 await _context.Entry(user).Collection(u => u.PreferredCategories).LoadAsync();
                 return MapToDto(user);
             }

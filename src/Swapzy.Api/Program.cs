@@ -1,16 +1,22 @@
+using Amazon.S3;
+using Amazon.SimpleNotificationService;
+using Amazon.SQS;
+using Swapzy.Infrastructure.Messaging.Handlers;
+using Swapzy.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Swapzy.Api.Middleware;
 using Swapzy.Application.Interfaces;
 using Swapzy.Application.Services;
 using Swapzy.Core.Configurations;
 using Swapzy.Core.Entities.Users;
 using Swapzy.Infrastructure.Data;
+using Swapzy.Infrastructure.Messaging;
 using Swapzy.Infrastructure.Repositories;
 using Swapzy.Infrastructure.Services;
-using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,7 +46,8 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddDbContext<SwapzyDbContext>(options =>
-    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
+        x => x.UseNetTopologySuite()));
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -60,6 +67,19 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ISocialAuthService, SocialAuthService>();
 builder.Services.AddHttpClient();
 builder.Services.AddAutoMapper(typeof(Swapzy.Application.Mappings.MappingProfile).Assembly);
+// AWS Messaging
+builder.Services.AddDefaultAWSOptions(configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonSimpleNotificationService>();
+builder.Services.AddAWSService<IAmazonSQS>();
+builder.Services.AddScoped<IEventPublisher, SnsEventPublisher>();
+builder.Services.AddHostedService<SqsConsumer>();
+// Event Handlers
+builder.Services.AddScoped<IEventHandler, ProductCreatedHandler>();
+// AWS S3
+builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddScoped<IStorageService, S3StorageService>();
+builder.Services.AddScoped<IProductImageService, ProductImageService>();
+builder.Services.AddScoped<IProximityService, ProximityService>();
 
 builder.Services.AddControllers().ConfigureValidationErrors();
 builder.Services.AddEndpointsApiExplorer();
