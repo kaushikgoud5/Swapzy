@@ -27,6 +27,7 @@ namespace Swapzy.Infrastructure.Data
         public DbSet<UserProfile> UserProfiles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("postgis");
 
             modelBuilder.Entity<UserEntity>(entity =>
             {

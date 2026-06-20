@@ -1,6 +1,7 @@
 using Amazon.S3;
 using Amazon.SimpleNotificationService;
 using Amazon.SQS;
+using Amazon.Runtime;
 using Swapzy.Infrastructure.Messaging.Handlers;
 using Swapzy.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -67,16 +68,40 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<ISocialAuthService, SocialAuthService>();
 builder.Services.AddHttpClient();
 builder.Services.AddAutoMapper(typeof(Swapzy.Application.Mappings.MappingProfile).Assembly);
-// AWS Messaging
-builder.Services.AddDefaultAWSOptions(configuration.GetAWSOptions());
-builder.Services.AddAWSService<IAmazonSimpleNotificationService>();
-builder.Services.AddAWSService<IAmazonSQS>();
+// AWS Services
+var serviceUrl = configuration["AWS:ServiceURL"];
+if (!string.IsNullOrEmpty(serviceUrl))
+{
+    builder.Services.AddSingleton<IAmazonSimpleNotificationService>(_ =>
+        new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig
+        {
+            ServiceURL = serviceUrl,
+            AuthenticationRegion = configuration["AWS:Region"]
+        }));
+    builder.Services.AddSingleton<IAmazonSQS>(_ =>
+        new AmazonSQSClient(new AmazonSQSConfig
+        {
+            ServiceURL = serviceUrl,
+            AuthenticationRegion = configuration["AWS:Region"]
+        }));
+    builder.Services.AddSingleton<IAmazonS3>(_ =>
+        new AmazonS3Client(new AmazonS3Config
+        {
+            ServiceURL = serviceUrl,
+            ForcePathStyle = true,
+            AuthenticationRegion = configuration["AWS:Region"]
+        }));
+}
+else
+{
+    builder.Services.AddDefaultAWSOptions(configuration.GetAWSOptions());
+    builder.Services.AddAWSService<IAmazonSimpleNotificationService>();
+    builder.Services.AddAWSService<IAmazonSQS>();
+    builder.Services.AddAWSService<IAmazonS3>();
+}
 builder.Services.AddScoped<IEventPublisher, SnsEventPublisher>();
 builder.Services.AddHostedService<SqsConsumer>();
-// Event Handlers
 builder.Services.AddScoped<IEventHandler, ProductCreatedHandler>();
-// AWS S3
-builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddScoped<IStorageService, S3StorageService>();
 builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IProximityService, ProximityService>();
@@ -112,6 +137,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Auto-migrate database
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SwapzyDbContext>();
+    db.Database.Migrate();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
