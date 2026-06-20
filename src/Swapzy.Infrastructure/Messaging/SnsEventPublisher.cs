@@ -22,7 +22,7 @@ namespace Swapzy.Infrastructure.Messaging
         public SnsEventPublisher(IAmazonSimpleNotificationService sns, IConfiguration configuration, ILogger<SnsEventPublisher> logger)
         {
             _sns = sns;
-            _topicArn = configuration["AWS:SnsTopicArn"];
+            _topicArn = configuration["AWS:SnsTopicArn"] ?? "";
             _logger = logger;
         }
         public async Task PublishAsync<T>(T domainEvent, CancellationToken ct = default) where T : DomainEvent
