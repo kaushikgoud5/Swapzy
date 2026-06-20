@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Swapzy.Core.Entities.Authorization;
 using Swapzy.Core.Entities.Categories;
+using Swapzy.Core.Entities.Notifications;
 using Swapzy.Core.Entities.Products;
 using Swapzy.Core.Entities.Users;
 
@@ -21,9 +22,12 @@ namespace Swapzy.Infrastructure.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductMetadata> ProductMetadata { get; set; }
         public DbSet<ProductLocation> ProductLocations { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Entity<UserEntity>(entity =>
             {
                 entity.HasKey(x => x.Id);
@@ -120,6 +124,30 @@ namespace Swapzy.Infrastructure.Data
 
                 entity.HasIndex(x => x.City);
                 entity.HasIndex(x => new { x.Country, x.City });
+
+                entity.Property(x => x.GeoLocation)
+                      .HasColumnType("geography(Point, 4326)");
+
+                entity.HasIndex(x => x.GeoLocation)
+                      .HasMethod("GIST");
+            });
+
+            modelBuilder.Entity<ProductImage>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => x.ProductId);
+
+                entity.HasOne(x => x.Product)
+                      .WithMany()
+                      .HasForeignKey(x => x.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => x.UserId);
+                entity.HasIndex(x => x.IsRead);
             });
         }
 

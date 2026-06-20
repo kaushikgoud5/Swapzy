@@ -1,9 +1,11 @@
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 using Swapzy.Application.DTOs.Requests;
 using Swapzy.Application.DTOs.Responses;
 using Swapzy.Application.Interfaces;
 using Swapzy.Core.Entities.Products;
 using Swapzy.Core.Enums;
+using Swapzy.Core.Events;
 using Swapzy.Core.Exceptions;
 
 namespace Swapzy.Infrastructure.Services
@@ -12,13 +14,16 @@ namespace Swapzy.Infrastructure.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ProductService> _logger;
+        private readonly IEventPublisher _eventPublisher;
 
         public ProductService(
             IUnitOfWork unitOfWork,
-            ILogger<ProductService> logger)
+            ILogger<ProductService> logger,
+            IEventPublisher eventPublisher)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task<ProductResponseDto> CreateAsync(CreateProductDto dto, Guid userId)
@@ -57,6 +62,7 @@ namespace Swapzy.Infrastructure.Services
                     PostalCode = dto.Location.PostalCode,
                     Latitude = dto.Location.Latitude,
                     Longitude = dto.Location.Longitude,
+                    GeoLocation = new Point((double)dto.Location.Longitude, (double)dto.Location.Latitude) { SRID = 4326 },
                     CreatedBy = userId.ToString(),
                     CreatedOn = DateTime.UtcNow
                 };
@@ -64,8 +70,14 @@ namespace Swapzy.Infrastructure.Services
 
             await _unitOfWork.Products.AddAsync(product);
             await _unitOfWork.SaveChangesAsync();
-
-            _logger.LogInformation("Product created with ID: {ProductId} by user: {UserId}", product.Id, userId);
+            await _eventPublisher.PublishAsync(new ProductCreatedEvent
+            {
+                ProductId = product.Id,
+                Name = product.Name,
+                CategoryId = product.ProductCategoryId,
+                OwnerId = product.OwnerId
+            });
+            _logger.LogInformation("Product {ProductId} created by {UserId}", product.Id, userId);
             return MapToDto(product);
         }
 
@@ -125,6 +137,7 @@ namespace Swapzy.Infrastructure.Services
                         PostalCode = dto.Location.PostalCode,
                         Latitude = dto.Location.Latitude,
                         Longitude = dto.Location.Longitude,
+                        GeoLocation = new Point((double)dto.Location.Longitude, (double)dto.Location.Latitude) { SRID = 4326 },
                         CreatedBy = userId.ToString(),
                         CreatedOn = DateTime.UtcNow
                     };
@@ -137,6 +150,7 @@ namespace Swapzy.Infrastructure.Services
                     product.Location.PostalCode = dto.Location.PostalCode;
                     product.Location.Latitude = dto.Location.Latitude;
                     product.Location.Longitude = dto.Location.Longitude;
+                    product.Location.GeoLocation = new Point((double)dto.Location.Longitude, (double)dto.Location.Latitude) { SRID = 4326 };
                     product.Location.ModifiedBy = userId.ToString();
                     product.Location.ModifiedOn = DateTime.UtcNow;
                 }
@@ -148,7 +162,6 @@ namespace Swapzy.Infrastructure.Services
             await _unitOfWork.Products.UpdateAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Product {ProductId} updated by user: {UserId}", id, userId);
             return MapToDto(product);
         }
 
@@ -161,7 +174,6 @@ namespace Swapzy.Infrastructure.Services
                 throw new ForbiddenException("You can only delete your own products.");
 
             var result = await _unitOfWork.Products.SoftDeleteAsync(id);
-            _logger.LogInformation("Product {ProductId} deleted by user: {UserId}", id, userId);
             return result;
         }
 
@@ -180,7 +192,6 @@ namespace Swapzy.Infrastructure.Services
             await _unitOfWork.Products.UpdateAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("Product {ProductId} availability toggled to {IsAvailable}", id, product.IsAvailable);
             return MapToDto(product);
         }
 

@@ -87,7 +87,6 @@ namespace Swapzy.Infrastructure.Services
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
 
-                _logger.LogInformation("Onboarding completed for user: {UserId}", userId);
                 return MapToDto(user, validCategoryIds);
             }
             catch
