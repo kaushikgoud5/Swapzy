@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/.vs/
+**/node_modules/
+**/.git/
+*.md
+.gitignore
+.gitattributes
+docker-compose.yml
