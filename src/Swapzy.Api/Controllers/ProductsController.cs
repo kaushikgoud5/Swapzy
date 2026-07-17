@@ -64,4 +64,12 @@ public class ProductsController(IProductService productService) : ControllerBase
         var result = await productService.ToggleAvailabilityAsync(id, userId);
         return Ok(new { product = result });
     }
+
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromQuery] ProductStatus status)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await productService.UpdateStatusAsync(id, status, userId);
+        return Ok(new { product = result });
+    }
 }

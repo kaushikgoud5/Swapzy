@@ -48,7 +48,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContext<SwapzyDbContext>(options =>
     options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
-        x => x.UseNetTopologySuite()));
+        x => x.UseNetTopologySuite()
+              .EnableRetryOnFailure(3)));
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -100,11 +101,16 @@ else
     builder.Services.AddAWSService<IAmazonS3>();
 }
 builder.Services.AddScoped<IEventPublisher, SnsEventPublisher>();
-builder.Services.AddHostedService<SqsConsumer>();
+if (!configuration.GetValue<bool>("AWS:DisableMessaging"))
+    builder.Services.AddHostedService<SqsConsumer>();
 builder.Services.AddScoped<IEventHandler, ProductCreatedHandler>();
+builder.Services.AddScoped<IEventHandler, MatchCreatedHandler>();
 builder.Services.AddScoped<IStorageService, S3StorageService>();
 builder.Services.AddScoped<IProductImageService, ProductImageService>();
 builder.Services.AddScoped<IProximityService, ProximityService>();
+builder.Services.AddScoped<ISwipeService, SwipeService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddControllers().ConfigureValidationErrors();
 builder.Services.AddEndpointsApiExplorer();

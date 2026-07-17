@@ -12,5 +12,6 @@ namespace Swapzy.Application.Interfaces
         Task<ProductResponseDto> UpdateAsync(int id, UpdateProductDto dto, Guid userId);
         Task<bool> DeleteAsync(int id, Guid userId);
         Task<ProductResponseDto> ToggleAvailabilityAsync(int id, Guid userId);
+        Task<ProductResponseDto> UpdateStatusAsync(int id, ProductStatus status, Guid userId);
     }
 }
