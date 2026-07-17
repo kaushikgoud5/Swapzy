@@ -70,13 +70,22 @@ namespace Swapzy.Infrastructure.Services
 
             await _unitOfWork.Products.AddAsync(product);
             await _unitOfWork.SaveChangesAsync();
-            await _eventPublisher.PublishAsync(new ProductCreatedEvent
+
+            try
             {
-                ProductId = product.Id,
-                Name = product.Name,
-                CategoryId = product.ProductCategoryId,
-                OwnerId = product.OwnerId
-            });
+                await _eventPublisher.PublishAsync(new ProductCreatedEvent
+                {
+                    ProductId = product.Id,
+                    Name = product.Name,
+                    CategoryId = product.ProductCategoryId,
+                    OwnerId = product.OwnerId
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to publish ProductCreatedEvent for product {ProductId}", product.Id);
+            }
+
             _logger.LogInformation("Product {ProductId} created by {UserId}", product.Id, userId);
             return MapToDto(product);
         }
@@ -186,6 +195,29 @@ namespace Swapzy.Infrastructure.Services
                 throw new ForbiddenException("You can only modify your own products.");
 
             product.IsAvailable = !product.IsAvailable;
+            product.ModifiedBy = userId.ToString();
+            product.ModifiedOn = DateTime.UtcNow;
+
+            await _unitOfWork.Products.UpdateAsync(product);
+            await _unitOfWork.SaveChangesAsync();
+
+            return MapToDto(product);
+        }
+
+        public async Task<ProductResponseDto> UpdateStatusAsync(int id, ProductStatus status, Guid userId)
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(id)
+                ?? throw new NotFoundException($"Product with ID {id} not found.");
+
+            if (product.OwnerId != userId)
+                throw new ForbiddenException("You can only update your own products.");
+
+            product.Status = status;
+            if (status == ProductStatus.Sold || status == ProductStatus.Swapped)
+                product.IsAvailable = false;
+            else if (status == ProductStatus.Available)
+                product.IsAvailable = true;
+
             product.ModifiedBy = userId.ToString();
             product.ModifiedOn = DateTime.UtcNow;
 

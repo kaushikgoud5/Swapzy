@@ -22,7 +22,14 @@ namespace Swapzy.Core.Enums
     {
         Available,
         Swapped,
+        Sold,
         Unavailable
+    }
+
+    public enum SwipeDirection
+    {
+        Like,
+        Pass
     }
 }
 

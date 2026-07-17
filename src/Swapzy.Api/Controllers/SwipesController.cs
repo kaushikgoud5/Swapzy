@@ -1,18 +1,25 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swapzy.Application.DTOs.Requests;
 using Swapzy.Application.Interfaces;
 using System.Security.Claims;
 
 namespace Swapzy.Api.Controllers;
 
-// Kept for backwards compatibility — delegates to feed
 [ApiController]
-[Route("products/nearby")]
 [Authorize]
-public class ProximityController(ISwipeService swipeService) : ControllerBase
+public class SwipesController(ISwipeService swipeService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> GetNearbyProducts(
+    [HttpPost("swipes/batch")]
+    public async Task<IActionResult> BatchSwipe([FromBody] BatchSwipeRequestDto dto)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await swipeService.BatchSwipeAsync(dto, userId);
+        return Ok(result);
+    }
+
+    [HttpGet("feed")]
+    public async Task<IActionResult> GetFeed(
         [FromQuery] double latitude,
         [FromQuery] double longitude,
         [FromQuery] double radiusKm = 10,

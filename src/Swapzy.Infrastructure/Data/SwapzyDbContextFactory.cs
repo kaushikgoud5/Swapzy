@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using Swapzy.Infrastructure.Data;
 
 public class SwapzyDbContextFactory : IDesignTimeDbContextFactory<SwapzyDbContext>
@@ -17,7 +18,7 @@ public class SwapzyDbContextFactory : IDesignTimeDbContextFactory<SwapzyDbContex
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
         var optionsBuilder = new DbContextOptionsBuilder<SwapzyDbContext>();
-        optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder.UseNpgsql(connectionString, x => x.UseNetTopologySuite());
 
         return new SwapzyDbContext(optionsBuilder.Options);
     }
