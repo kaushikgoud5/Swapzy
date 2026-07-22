@@ -48,6 +48,29 @@ namespace Swapzy.Infrastructure.Repositories
             await _transaction.RollbackAsync(cancellationToken);
         }
 
+        public async Task ExecuteInTransactionAsync(Func<Task> operation, CancellationToken cancellationToken = default)
+        {
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync<object?, object?>(null,
+                async (ctx, state, ct) =>
+                {
+                    await using var tx = await _context.Database.BeginTransactionAsync(ct);
+                    try
+                    {
+                        await operation();
+                        await tx.CommitAsync(ct);
+                    }
+                    catch
+                    {
+                        await tx.RollbackAsync(ct);
+                        throw;
+                    }
+                    return null;
+                },
+                null,
+                cancellationToken);
+        }
+
         public void Dispose()
         {
             _transaction?.Dispose();

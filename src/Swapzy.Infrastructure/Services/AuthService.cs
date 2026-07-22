@@ -50,20 +50,13 @@ namespace Swapzy.Application.Services
             var userRole = await _unitOfWork.Roles.GetByNameAsync(dto.Role)
                 ?? throw new BadRequestException($"Role '{dto.Role}' not found.");
 
-            await _unitOfWork.BeginTransactionAsync();
-            try
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 await _unitOfWork.Users.AddAsync(user);
                 await _unitOfWork.Users.AssignRoleAsync(user.Id, userRole);
                 await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
-                return user.Id;
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+            });
+            return user.Id;
         }
 
         public async Task<AuthResponseDto> LoginAsync(LoginRequestDto dto)
@@ -155,20 +148,13 @@ namespace Swapzy.Application.Services
                 };
 
                 var userRole = await _unitOfWork.Roles.GetByNameAsync(Roles.User);
-                await _unitOfWork.BeginTransactionAsync();
-                try
+                await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
                     await _unitOfWork.Users.AddAsync(user);
                     if (userRole != null)
                         await _unitOfWork.Users.AssignRoleAsync(user.Id, userRole);
                     await _unitOfWork.SaveChangesAsync();
-                    await _unitOfWork.CommitTransactionAsync();
-                }
-                catch
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    throw;
-                }
+                });
             }
 
             var accessToken = await _jwtTokenService.GenerateAccessTokenAsync(user);
