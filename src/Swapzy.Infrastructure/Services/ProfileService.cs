@@ -49,8 +49,7 @@ namespace Swapzy.Infrastructure.Services
             if (user.Profile == null)
                 throw new BadRequestException("Complete onboarding before editing profile.");
 
-            await _unitOfWork.BeginTransactionAsync();
-            try
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 if (dto.AvatarUrl != null)
                     user.Profile.AvatarUrl = dto.AvatarUrl;
@@ -103,16 +102,10 @@ namespace Swapzy.Infrastructure.Services
                 user.Profile.ModifiedOn = DateTime.UtcNow;
 
                 await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+            });
 
-                await _context.Entry(user).Collection(u => u.PreferredCategories).LoadAsync();
-                return MapToDto(user);
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+            await _context.Entry(user).Collection(u => u.PreferredCategories).LoadAsync();
+            return MapToDto(user);
         }
 
         private static ProfileResponseDto MapToDto(UserEntity user)

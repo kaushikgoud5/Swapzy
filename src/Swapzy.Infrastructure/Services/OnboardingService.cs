@@ -44,8 +44,7 @@ namespace Swapzy.Infrastructure.Services
             if (validCategoryIds.Count < 3)
                 throw new BadRequestException("At least 3 valid active categories are required.");
 
-            await _unitOfWork.BeginTransactionAsync();
-            try
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 if (user.Profile == null)
                 {
@@ -85,15 +84,9 @@ namespace Swapzy.Infrastructure.Services
                 user.ModifiedOn = DateTime.UtcNow;
 
                 await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+            });
 
-                return MapToDto(user, validCategoryIds);
-            }
-            catch
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw;
-            }
+            return MapToDto(user, validCategoryIds);
         }
 
         public async Task<OnboardingResponseDto> GetOnboardingStatusAsync(Guid userId)

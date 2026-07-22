@@ -46,8 +46,16 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+var useLocalDb = configuration.GetValue<bool>("UseLocalDb");
+var connectionString = useLocalDb
+    ? configuration.GetConnectionString("LocalConnection")
+    : configuration.GetConnectionString("DefaultConnection");
+
+var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Startup");
+logger.LogInformation("Using {db} database", useLocalDb ? "LOCAL" : "SUPABASE");
+
 builder.Services.AddDbContext<SwapzyDbContext>(options =>
-    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
+    options.UseNpgsql(connectionString,
         x => x.UseNetTopologySuite()
               .EnableRetryOnFailure(3)));
 
@@ -147,8 +155,16 @@ var app = builder.Build();
 // Auto-migrate database
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<SwapzyDbContext>();
-    db.Database.Migrate();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<SwapzyDbContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        startupLogger.LogError(ex, "Migration failed — app will still start");
+    }
 }
 
 app.UseSwagger();
