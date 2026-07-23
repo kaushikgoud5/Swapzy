@@ -103,10 +103,22 @@ if (!string.IsNullOrEmpty(serviceUrl))
 }
 else
 {
-    builder.Services.AddDefaultAWSOptions(configuration.GetAWSOptions());
-    builder.Services.AddAWSService<IAmazonSimpleNotificationService>();
-    builder.Services.AddAWSService<IAmazonSQS>();
-    builder.Services.AddAWSService<IAmazonS3>();
+    var region = configuration["AWS:Region"] ?? "ap-south-1";
+    var accessKey = configuration["AWS:AccessKey"];
+    var secretKey = configuration["AWS:SecretKey"];
+    AWSCredentials awsCredentials = !string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey)
+        ? new BasicAWSCredentials(accessKey, secretKey)
+        : new EnvironmentVariablesAWSCredentials();
+
+    builder.Services.AddSingleton<IAmazonSimpleNotificationService>(_ =>
+        new AmazonSimpleNotificationServiceClient(awsCredentials,
+            Amazon.RegionEndpoint.GetBySystemName(region)));
+    builder.Services.AddSingleton<IAmazonSQS>(_ =>
+        new AmazonSQSClient(awsCredentials,
+            Amazon.RegionEndpoint.GetBySystemName(region)));
+    builder.Services.AddSingleton<IAmazonS3>(_ =>
+        new AmazonS3Client(awsCredentials,
+            Amazon.RegionEndpoint.GetBySystemName(region)));
 }
 builder.Services.AddScoped<IEventPublisher, SnsEventPublisher>();
 if (!configuration.GetValue<bool>("AWS:DisableMessaging"))
