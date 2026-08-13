@@ -34,7 +34,7 @@ namespace Swapzy.Application.Services
             _logger = logger;
         }
 
-        public async Task<Guid> RegisterAsync(RegisterRequestDto dto)
+        public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto dto)
         {
             if (await _unitOfWork.Users.EmailExistsAsync(dto.Email))
                 throw new ConflictException("User with this email already exists.");
@@ -56,7 +56,18 @@ namespace Swapzy.Application.Services
                 await _unitOfWork.Users.AssignRoleAsync(user.Id, userRole);
                 await _unitOfWork.SaveChangesAsync();
             });
-            return user.Id;
+
+            var accessToken = await _jwtTokenService.GenerateAccessTokenAsync(user);
+            var refreshToken = await _jwtTokenService.GenerateRefreshTokenAsync();
+
+            await _jwtTokenService.StoreRefreshTokenAsync(user.Id, refreshToken);
+
+            return new AuthResponseDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                User = new AuthUserDto { Id = user.Id.ToString(), Email = user.Email, Name = user.Name },
+            };
         }
 
         public async Task<AuthResponseDto> LoginAsync(LoginRequestDto dto)
@@ -69,15 +80,13 @@ namespace Swapzy.Application.Services
 
             var accessToken = await _jwtTokenService.GenerateAccessTokenAsync(user);
             var refreshToken = await _jwtTokenService.GenerateRefreshTokenAsync();
-            var expiresAt = DateTime.UtcNow.AddDays(7);
 
-            await _jwtTokenService.StoreRefreshTokenAsync(user.Id, refreshToken, expiresAt);
+            await _jwtTokenService.StoreRefreshTokenAsync(user.Id, refreshToken);
 
             return new AuthResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresAt = expiresAt,
                 User = new AuthUserDto { Id = user.Id.ToString(), Email = user.Email, Name = user.Name },
             };
         }
@@ -101,15 +110,13 @@ namespace Swapzy.Application.Services
 
             var newAccessToken = await _jwtTokenService.GenerateAccessTokenAsync(user);
             var newRefreshToken = await _jwtTokenService.GenerateRefreshTokenAsync();
-            var expiresAt = DateTime.UtcNow.AddDays(7);
 
-            await _jwtTokenService.StoreRefreshTokenAsync(user.Id, newRefreshToken, expiresAt);
+            await _jwtTokenService.StoreRefreshTokenAsync(user.Id, newRefreshToken);
 
             return new AuthResponseDto
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                ExpiresAt = expiresAt,
                 User = new AuthUserDto { Id = user.Id.ToString(), Email = user.Email, Name = user.Name },
             };
         }
@@ -160,13 +167,12 @@ namespace Swapzy.Application.Services
             var accessToken = await _jwtTokenService.GenerateAccessTokenAsync(user);
             var refreshToken = await _jwtTokenService.GenerateRefreshTokenAsync();
             var expiresAt = DateTime.UtcNow.AddDays(7);
-            await _jwtTokenService.StoreRefreshTokenAsync(user.Id, refreshToken, expiresAt);
+            await _jwtTokenService.StoreRefreshTokenAsync(user.Id, refreshToken);
 
             return new AuthResponseDto
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresAt = expiresAt,
                 User = new AuthUserDto { Id = user.Id.ToString(), Email = user.Email, Name = user.Name },
             };
         }

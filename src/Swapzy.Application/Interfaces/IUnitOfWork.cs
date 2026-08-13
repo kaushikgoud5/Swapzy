@@ -6,6 +6,7 @@ namespace Swapzy.Application.Interfaces
         IRoleRepository Roles { get; }
         ICategoryRepository Categories { get; }
         IProductRepository Products { get; }
+        IInterestRepository Interests { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task CommitTransactionAsync(CancellationToken cancellationToken = default);

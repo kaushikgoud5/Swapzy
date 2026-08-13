@@ -5,11 +5,10 @@ using System.Security.Claims;
 
 namespace Swapzy.Api.Controllers;
 
-// Kept for backwards compatibility — delegates to feed
 [ApiController]
 [Route("products/nearby")]
 [Authorize]
-public class ProximityController(ISwipeService swipeService) : ControllerBase
+public class ProximityController(IProximityService proximityService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetNearbyProducts(
@@ -20,7 +19,7 @@ public class ProximityController(ISwipeService swipeService) : ControllerBase
         [FromQuery] int pageSize = 20)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var results = await swipeService.GetFeedAsync(latitude, longitude, radiusKm, userId, page, pageSize);
+        var results = await proximityService.GetNearbyProductsAsync(latitude, longitude, radiusKm, userId, page, pageSize);
         return Ok(new { products = results, page, pageSize, hasMore = results.Count == pageSize });
     }
 }

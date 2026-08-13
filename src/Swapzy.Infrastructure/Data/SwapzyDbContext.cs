@@ -1,10 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Swapzy.Core.Entities.Authorization;
 using Swapzy.Core.Entities.Categories;
-using Swapzy.Core.Entities.Matches;
+using Swapzy.Core.Entities.Interests;
 using Swapzy.Core.Entities.Notifications;
 using Swapzy.Core.Entities.Products;
-using Swapzy.Core.Entities.Swipes;
 using Swapzy.Core.Entities.Users;
 
 namespace Swapzy.Infrastructure.Data
@@ -27,8 +26,7 @@ namespace Swapzy.Infrastructure.Data
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
-        public DbSet<Swipe> Swipes { get; set; }
-        public DbSet<Match> Matches { get; set; }
+        public DbSet<Interest> Interests { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresExtension("postgis");
@@ -155,36 +153,17 @@ namespace Swapzy.Infrastructure.Data
                 entity.HasIndex(x => x.IsRead);
             });
 
-            modelBuilder.Entity<Swipe>(entity =>
-            {
-                entity.HasKey(x => x.Id);
-                entity.HasIndex(x => new { x.SwiperId, x.ProductId }).IsUnique();
-                entity.HasIndex(x => new { x.SwiperId, x.Direction });
-                entity.HasIndex(x => x.ProductId);
-
-                entity.HasOne(x => x.Swiper)
-                      .WithMany()
-                      .HasForeignKey(x => x.SwiperId)
-                      .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(x => x.Product)
-                      .WithMany()
-                      .HasForeignKey(x => x.ProductId)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<Match>(entity =>
+            modelBuilder.Entity<Interest>(entity =>
             {
                 entity.HasKey(x => x.Id);
 
-                // Prevent duplicate matches for same user+product
-                entity.HasIndex(x => new { x.InterestedUserId, x.ProductId }).IsUnique();
+                entity.HasIndex(x => new { x.BuyerId, x.ProductId }).IsUnique();
                 entity.HasIndex(x => new { x.SellerId, x.Status });
-                entity.HasIndex(x => new { x.InterestedUserId, x.Status });
+                entity.HasIndex(x => new { x.BuyerId, x.Status });
 
-                entity.HasOne(x => x.InterestedUser)
+                entity.HasOne(x => x.Buyer)
                       .WithMany()
-                      .HasForeignKey(x => x.InterestedUserId)
+                      .HasForeignKey(x => x.BuyerId)
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(x => x.Seller)

@@ -13,19 +13,22 @@ namespace Swapzy.Infrastructure.Repositories
         public IRoleRepository Roles { get; }
         public ICategoryRepository Categories { get; }
         public IProductRepository Products { get; }
+        public IInterestRepository Interests { get; }
 
         public UnitOfWork(
             SwapzyDbContext context,
             IUserRepository users,
             IRoleRepository roles,
             ICategoryRepository categories,
-            IProductRepository products)
+            IProductRepository products,
+            IInterestRepository interests)
         {
             _context = context;
             Users = users;
             Roles = roles;
             Categories = categories;
             Products = products;
+            Interests = interests;
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

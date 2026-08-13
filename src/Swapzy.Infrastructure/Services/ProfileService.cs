@@ -46,11 +46,15 @@ namespace Swapzy.Infrastructure.Services
             if (user == null)
                 throw new NotFoundException("User not found.");
 
-            if (user.Profile == null)
-                throw new BadRequestException("Complete onboarding before editing profile.");
-
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
+                user.Profile ??= new UserProfile
+                {
+                    UserId = userId,
+                    CreatedBy = userId.ToString(),
+                    CreatedOn = DateTime.UtcNow
+                };
+
                 if (dto.AvatarUrl != null)
                     user.Profile.AvatarUrl = dto.AvatarUrl;
 
@@ -83,8 +87,7 @@ namespace Swapzy.Infrastructure.Services
                     if (validCategoryIds.Count < 3)
                         throw new BadRequestException("At least 3 valid active categories are required.");
 
-                    var existing = user.PreferredCategories.ToList();
-                    _context.UserPreferredCategories.RemoveRange(existing);
+                    _context.UserPreferredCategories.RemoveRange(user.PreferredCategories);
 
                     foreach (var categoryId in validCategoryIds)
                     {
@@ -104,7 +107,9 @@ namespace Swapzy.Infrastructure.Services
                 await _unitOfWork.SaveChangesAsync();
             });
 
-            await _context.Entry(user).Collection(u => u.PreferredCategories).LoadAsync();
+            if (dto.PreferredCategoryIds != null)
+                await _context.Entry(user).Collection(u => u.PreferredCategories).LoadAsync();
+
             return MapToDto(user);
         }
 
@@ -123,7 +128,7 @@ namespace Swapzy.Infrastructure.Services
 
             if (user.Profile is { Country: not null })
             {
-                dto.Location = new OnboardingLocationResponseDto
+                dto.Location = new LocationResponseDto
                 {
                     Country = user.Profile.Country,
                     State = user.Profile.State!,

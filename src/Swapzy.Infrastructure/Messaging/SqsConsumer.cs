@@ -38,7 +38,7 @@ namespace Swapzy.Infrastructure.Messaging
                         MessageAttributeNames = new List<string> { "All" }
                     }, stoppingToken);
 
-                    foreach (var msg in response.Messages)
+                    foreach (var msg in response.Messages ?? [])
                     {
                         try
                         {

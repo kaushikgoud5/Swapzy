@@ -183,6 +183,7 @@ namespace Swapzy.Infrastructure.Services
                 throw new ForbiddenException("You can only delete your own products.");
 
             var result = await _unitOfWork.Products.SoftDeleteAsync(id);
+            await _unitOfWork.SaveChangesAsync();
             return result;
         }
 
