@@ -18,7 +18,6 @@ namespace Swapzy.Infrastructure.Repositories
         public async Task<Product> AddAsync(Product product)
         {
             await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
             return product;
         }
 
@@ -54,7 +53,6 @@ namespace Swapzy.Infrastructure.Repositories
         public async Task<Product> UpdateAsync(Product product)
         {
             _context.Products.Update(product);
-            await _context.SaveChangesAsync();
             return product;
         }
 
@@ -66,7 +64,6 @@ namespace Swapzy.Infrastructure.Repositories
             product.DateDeleted = DateTime.UtcNow;
             product.IsActive = false;
             product.IsAvailable = false;
-            await _context.SaveChangesAsync();
             return true;
         }
     }

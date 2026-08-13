@@ -13,8 +13,8 @@ using Swapzy.Infrastructure.Data;
 namespace Swapzy.Infrastructure.Migrations
 {
     [DbContext(typeof(SwapzyDbContext))]
-    [Migration("20260717141103_AddMatches")]
-    partial class AddMatches
+    [Migration("20260804121904_RemoveOnboarding")]
+    partial class RemoveOnboarding
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -221,16 +221,14 @@ namespace Swapzy.Infrastructure.Migrations
                     b.ToTable("UserPreferredCategories");
                 });
 
-            modelBuilder.Entity("Swapzy.Core.Entities.Matches.Match", b =>
+            modelBuilder.Entity("Swapzy.Core.Entities.Interests.Interest", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<Guid>("BuyerId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
@@ -240,9 +238,6 @@ namespace Swapzy.Infrastructure.Migrations
 
                     b.Property<DateTime?>("DateDeleted")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("InterestedUserId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("text");
@@ -263,14 +258,14 @@ namespace Swapzy.Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("InterestedUserId", "ProductId")
+                    b.HasIndex("BuyerId", "ProductId")
                         .IsUnique();
 
-                    b.HasIndex("InterestedUserId", "Status");
+                    b.HasIndex("BuyerId", "Status");
 
                     b.HasIndex("SellerId", "Status");
 
-                    b.ToTable("Matches");
+                    b.ToTable("Interests");
                 });
 
             modelBuilder.Entity("Swapzy.Core.Entities.Notifications.Notification", b =>
@@ -530,50 +525,6 @@ namespace Swapzy.Infrastructure.Migrations
                     b.ToTable("ProductMetadata");
                 });
 
-            modelBuilder.Entity("Swapzy.Core.Entities.Swipes.Swipe", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateDeleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Direction")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedOn")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("SwiperId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("SwiperId", "Direction");
-
-                    b.HasIndex("SwiperId", "ProductId")
-                        .IsUnique();
-
-                    b.ToTable("Swipes");
-                });
-
             modelBuilder.Entity("Swapzy.Core.Entities.Users.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -596,9 +547,6 @@ namespace Swapzy.Infrastructure.Migrations
                     b.Property<string>("HashedPassword")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsOnboarded")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("text");
@@ -741,11 +689,11 @@ namespace Swapzy.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Swapzy.Core.Entities.Matches.Match", b =>
+            modelBuilder.Entity("Swapzy.Core.Entities.Interests.Interest", b =>
                 {
-                    b.HasOne("Swapzy.Core.Entities.Users.UserEntity", "InterestedUser")
+                    b.HasOne("Swapzy.Core.Entities.Users.UserEntity", "Buyer")
                         .WithMany()
-                        .HasForeignKey("InterestedUserId")
+                        .HasForeignKey("BuyerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -761,7 +709,7 @@ namespace Swapzy.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("InterestedUser");
+                    b.Navigation("Buyer");
 
                     b.Navigation("Product");
 
@@ -818,25 +766,6 @@ namespace Swapzy.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Swapzy.Core.Entities.Swipes.Swipe", b =>
-                {
-                    b.HasOne("Swapzy.Core.Entities.Products.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Swapzy.Core.Entities.Users.UserEntity", "Swiper")
-                        .WithMany()
-                        .HasForeignKey("SwiperId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Swiper");
                 });
 
             modelBuilder.Entity("Swapzy.Core.Entities.Users.UserProfile", b =>

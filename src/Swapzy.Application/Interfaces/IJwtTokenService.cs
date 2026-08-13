@@ -14,7 +14,7 @@ namespace Swapzy.Application.Interfaces
         Task<string> GenerateRefreshTokenAsync();
         ClaimsPrincipal? ValidateToken(string token);
         Task<bool> ValidateRefreshTokenAsync(Guid userId, string refreshToken);
-        Task StoreRefreshTokenAsync(Guid userId, string refreshToken, DateTime expiresAt);
+        Task StoreRefreshTokenAsync(Guid userId, string refreshToken);
         Task RevokeRefreshTokenAsync(Guid userId, string refreshToken);
         Task RevokeAllUserTokensAsync(Guid userId);
     }

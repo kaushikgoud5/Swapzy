@@ -1,35 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Swapzy.Core.Enums
 {
-    public enum RelationshipRule
-    {
-        OWNER,
-        PARTICIPANT,
-        ANY
-    }
-    public enum ResourceType
-    {
-        Prouduct,
-        User,
-        Category,
-    }
-    public enum ProductStatus
-    {
-        Available,
-        Swapped,
-        Sold,
-        Unavailable
-    }
+    public enum RelationshipRule { OWNER, PARTICIPANT, ANY }
 
-    public enum SwipeDirection
-    {
-        Like,
-        Pass
-    }
+    public enum ResourceType { Product, User, Category }
+
+    public enum ProductStatus { Available, Swapped, Sold, Unavailable }
+
+    public enum InterestStatus { Pending, Responded, Closed }
 }
-

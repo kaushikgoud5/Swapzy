@@ -11,7 +11,7 @@ namespace Swapzy.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<Guid> RegisterAsync(RegisterRequestDto dto);
+        Task<AuthResponseDto> RegisterAsync(RegisterRequestDto dto);
         Task<AuthResponseDto> LoginAsync(LoginRequestDto dto);
         Task<AuthResponseDto> SocialLoginAsync(string provider, string token);
         Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);

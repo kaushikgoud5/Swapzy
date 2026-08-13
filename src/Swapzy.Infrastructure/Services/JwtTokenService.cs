@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Swapzy.Application.Interfaces;
@@ -18,18 +17,15 @@ namespace Swapzy.Infrastructure.Services
         private readonly JwtSettings _jwtSettings;
         private readonly IRoleRepository _roleRepository;
         private readonly IDistributedCache _cache;
-        private readonly IConfiguration _configuration;
 
         public JwtTokenService(
             IOptions<JwtSettings> jwtSettings,
             IRoleRepository roleRepository,
-            IDistributedCache cache,
-            IConfiguration configuration)
+            IDistributedCache cache)
         {
             _jwtSettings = jwtSettings.Value;
             _roleRepository = roleRepository;
             _cache = cache;
-            _configuration = configuration;
         }
 
         public async Task<string> GenerateAccessTokenAsync(UserEntity user)
@@ -56,15 +52,14 @@ namespace Swapzy.Infrastructure.Services
                 claims.Add(new Claim("permissions", permission));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
 
             var token = new JwtSecurityToken(
-               issuer: _configuration["Jwt:Issuer"],
-               audience: _configuration["Jwt:Audience"],
+               issuer: _jwtSettings.Issuer,
+               audience: _jwtSettings.Audience,
                claims: claims,
-               expires: DateTime.UtcNow.AddHours(2),
+               expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
                signingCredentials: credentials
            );
 
@@ -114,8 +109,9 @@ namespace Swapzy.Infrastructure.Services
             return cachedToken != null;
         }
 
-        public async Task StoreRefreshTokenAsync(Guid userId, string refreshToken, DateTime expiresAt)
+        public async Task StoreRefreshTokenAsync(Guid userId, string refreshToken)
         {
+            var expiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays);
             var cacheKey = $"refresh_token:{userId}:{refreshToken}";
             var tokenData = new
             {

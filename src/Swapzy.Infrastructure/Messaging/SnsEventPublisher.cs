@@ -1,16 +1,10 @@
-﻿using Amazon.Runtime.Internal.Util;
-using Amazon.SimpleNotificationService;
+﻿using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Swapzy.Application.Interfaces;
 using Swapzy.Core.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Swapzy.Infrastructure.Messaging
 {

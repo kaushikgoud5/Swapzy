@@ -13,8 +13,8 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequestDto dto)
     {
-        var userId = await authService.RegisterAsync(dto);
-        return StatusCode(201, new { userId });
+        var response = await authService.RegisterAsync(dto);
+        return StatusCode(201, response);
     }
 
     [HttpPost("login")]

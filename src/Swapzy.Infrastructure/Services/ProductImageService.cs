@@ -85,19 +85,12 @@ namespace Swapzy.Infrastructure.Services
                 .OrderBy(i => i.DisplayOrder)
                 .ToListAsync();
 
-            var result = new List<ProductImageResponseDto>();
-            foreach (var image in images)
+            return images.Select(image => new ProductImageResponseDto
             {
-                var url = await _storageService.GenerateReadUrlAsync(image.S3Key);
-                result.Add(new ProductImageResponseDto
-                {
-                    Id = image.Id,
-                    Url = url,
-                    DisplayOrder = image.DisplayOrder
-                });
-            }
-
-            return result;
+                Id = image.Id,
+                Url = _storageService.GenerateReadUrlAsync(image.S3Key).GetAwaiter().GetResult(),
+                DisplayOrder = image.DisplayOrder
+            }).ToList();
         }
 
         public async Task DeleteAsync(int productId, int imageId, Guid userId)
