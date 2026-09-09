@@ -9,11 +9,13 @@ namespace Swapzy.Infrastructure.Storage
     {
         private readonly IAmazonS3 _s3;
         private readonly string _bucketName;
+        private readonly string _cloudFrontDomain;
 
         public S3StorageService(IAmazonS3 s3, IConfiguration configuration)
         {
             _s3 = s3;
             _bucketName = configuration["AWS:S3BucketName"]!;
+            _cloudFrontDomain = configuration["AWS:CloudFrontDomain"]!;
         }
 
         public Task<string> GenerateUploadUrlAsync(string key, string contentType, int expirationMinutes = 15)
@@ -47,5 +49,8 @@ namespace Swapzy.Infrastructure.Storage
         {
             await _s3.DeleteObjectAsync(_bucketName, key);
         }
+
+        public string GetPublicUrl(string key) =>
+            $"https://{_cloudFrontDomain}/{key}";
     }
 }

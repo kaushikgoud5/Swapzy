@@ -18,6 +18,7 @@ namespace Swapzy.Application.DTOs.Responses
         public ProductLocationResponseDto? Location { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime? ModifiedOn { get; set; }
+        public List<ProductImageResponseDto> Images { get; set; } = [];
     }
 
     public class ProductLocationResponseDto
