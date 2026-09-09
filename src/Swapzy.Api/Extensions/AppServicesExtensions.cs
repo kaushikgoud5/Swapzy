@@ -30,6 +30,7 @@ public static class AppServicesExtensions
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IProximityService, ProximityService>();
         services.AddScoped<IInterestService, InterestService>();
+        services.AddScoped<IChatService, ChatService>();
         services.AddScoped<INotificationService, NotificationService>();
 
         services.AddHttpClient();

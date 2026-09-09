@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Swapzy.Infrastructure.Data;
 namespace Swapzy.Infrastructure.Migrations
 {
     [DbContext(typeof(SwapzyDbContext))]
-    partial class SwapzyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260909173144_AddMatches")]
+    partial class AddMatches
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -310,46 +313,6 @@ namespace Swapzy.Infrastructure.Migrations
                     b.HasIndex("SellerId");
 
                     b.ToTable("Matches");
-                });
-
-            modelBuilder.Entity("Swapzy.Core.Entities.Interests.Message", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateDeleted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("MatchId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedOn")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SenderId");
-
-                    b.HasIndex("MatchId", "CreatedOn");
-
-                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Swapzy.Core.Entities.Notifications.Notification", b =>
@@ -833,25 +796,6 @@ namespace Swapzy.Infrastructure.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Seller");
-                });
-
-            modelBuilder.Entity("Swapzy.Core.Entities.Interests.Message", b =>
-                {
-                    b.HasOne("Swapzy.Core.Entities.Interests.Match", "Match")
-                        .WithMany()
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Swapzy.Core.Entities.Users.UserEntity", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Match");
-
-                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("Swapzy.Core.Entities.Products.Product", b =>

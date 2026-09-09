@@ -26,5 +26,6 @@ namespace Swapzy.Core.Entities.Products
         public Category Category { get; set; } = null!;
         public ProductLocation? Location { get; set; }
         public UserEntity Owner { get; set; } = null!;
+        public ICollection<ProductImage> Images { get; set; } = [];
     }
 }

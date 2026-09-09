@@ -15,15 +15,18 @@ namespace Swapzy.Infrastructure.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ProductService> _logger;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IStorageService _storageService;
 
         public ProductService(
             IUnitOfWork unitOfWork,
             ILogger<ProductService> logger,
-            IEventPublisher eventPublisher)
+            IEventPublisher eventPublisher,
+            IStorageService storageService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _eventPublisher = eventPublisher;
+            _storageService = storageService;
         }
 
         public async Task<ProductResponseDto> CreateAsync(CreateProductDto dto, Guid userId)
@@ -228,7 +231,7 @@ namespace Swapzy.Infrastructure.Services
             return MapToDto(product);
         }
 
-        private static ProductResponseDto MapToDto(Product product)
+        private ProductResponseDto MapToDto(Product product)
         {
             var dto = new ProductResponseDto
             {
@@ -259,6 +262,16 @@ namespace Swapzy.Infrastructure.Services
                     Longitude = product.Location.Longitude
                 };
             }
+
+            dto.Images = product.Images
+                .Where(i => i.DateDeleted == null)
+                .OrderBy(i => i.DisplayOrder)
+                .Select(i => new ProductImageResponseDto
+                {
+                    Id = i.Id,
+                    Url = _storageService.GetPublicUrl(i.S3Key),
+                    DisplayOrder = i.DisplayOrder
+                }).ToList();
 
             return dto;
         }

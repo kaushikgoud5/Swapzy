@@ -1,11 +1,14 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Swapzy.Application.DTOs.Responses;
 using Swapzy.Application.Interfaces;
 using Swapzy.Core.Entities.Interests;
+using Swapzy.Core.Entities.Notifications;
 using Swapzy.Core.Enums;
 using Swapzy.Core.Events;
 using Swapzy.Core.Exceptions;
+using Swapzy.Infrastructure.Data;
 
 namespace Swapzy.Infrastructure.Services;
 
@@ -15,13 +18,17 @@ public class InterestService : IInterestService
     private readonly IEventPublisher _eventPublisher;
     private readonly IMapper _mapper;
     private readonly ILogger<InterestService> _logger;
+    private readonly SwapzyDbContext _context;
+    private readonly IStorageService _storageService;
 
-    public InterestService(IUnitOfWork unitOfWork, IEventPublisher eventPublisher, IMapper mapper, ILogger<InterestService> logger)
+    public InterestService(IUnitOfWork unitOfWork, IEventPublisher eventPublisher, IMapper mapper, ILogger<InterestService> logger, SwapzyDbContext context, IStorageService storageService)
     {
         _unitOfWork = unitOfWork;
         _eventPublisher = eventPublisher;
         _mapper = mapper;
         _logger = logger;
+        _context = context;
+        _storageService = storageService;
     }
 
     public async Task<InterestResponseDto> ExpressInterestAsync(Guid buyerId, int productId)
@@ -92,7 +99,62 @@ public class InterestService : IInterestService
         interest.ModifiedOn = DateTime.UtcNow;
         interest.ModifiedBy = userId.ToString();
 
+        if (status == InterestStatus.Accepted)
+        {
+            var alreadyMatched = await _context.Matches.AnyAsync(m => m.InterestId == interestId);
+            if (!alreadyMatched)
+            {
+                await _context.Matches.AddAsync(new Match
+                {
+                    Id = Guid.NewGuid(),
+                    InterestId = interestId,
+                    BuyerId = interest.BuyerId,
+                    SellerId = interest.SellerId,
+                    ProductId = interest.ProductId,
+                    CreatedOn = DateTime.UtcNow,
+                    CreatedBy = userId.ToString()
+                });
+
+                // notify buyer
+                await _context.Notifications.AddAsync(new Notification
+                {
+                    UserId = interest.BuyerId,
+                    Title = "It's a match!",
+                    Message = $"The seller accepted your interest in {interest.Product.Name}.",
+                    EventType = "MatchCreatedEvent",
+                    CreatedOn = DateTime.UtcNow,
+                    CreatedBy = "system"
+                });
+            }
+        }
+
         await _unitOfWork.SaveChangesAsync();
+        await _context.SaveChangesAsync();
         return _mapper.Map<InterestResponseDto>(interest);
+    }
+
+    public async Task<List<MatchResponseDto>> GetMatchesAsync(Guid userId, int page, int pageSize)
+    {
+        var matches = await _context.Matches
+            .Include(m => m.Product)
+                .ThenInclude(p => p.Images.Where(i => i.DateDeleted == null))
+            .Where(m => m.DateDeleted == null && (m.BuyerId == userId || m.SellerId == userId))
+            .OrderByDescending(m => m.CreatedOn)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return matches.Select(m => new MatchResponseDto
+        {
+            Id = m.Id,
+            InterestId = m.InterestId,
+            BuyerId = m.BuyerId,
+            SellerId = m.SellerId,
+            ProductId = m.ProductId,
+            ProductName = m.Product.Name,
+            ProductImageUrl = m.Product.Images.OrderBy(i => i.DisplayOrder).Select(i => _storageService.GetPublicUrl(i.S3Key)).FirstOrDefault(),
+            IsSwapped = m.Product.Status == Swapzy.Core.Enums.ProductStatus.Sold,
+            CreatedOn = m.CreatedOn
+        }).ToList();
     }
 }

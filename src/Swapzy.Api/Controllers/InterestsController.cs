@@ -43,4 +43,12 @@ public class InterestsController(IInterestService interestService) : ControllerB
         var result = await interestService.UpdateStatusAsync(id, status, userId);
         return Ok(new { interest = result });
     }
+
+    [HttpGet("matches")]
+    public async Task<IActionResult> GetMatches([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var results = await interestService.GetMatchesAsync(userId, page, pageSize);
+        return Ok(new { matches = results, page, pageSize, hasMore = results.Count == pageSize });
+    }
 }

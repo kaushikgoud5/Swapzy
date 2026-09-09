@@ -5,6 +5,7 @@ using Swapzy.Core.Entities.Interests;
 using Swapzy.Core.Entities.Notifications;
 using Swapzy.Core.Entities.Products;
 using Swapzy.Core.Entities.Users;
+using Message = Swapzy.Core.Entities.Interests.Message;
 
 namespace Swapzy.Infrastructure.Data
 {
@@ -27,6 +28,8 @@ namespace Swapzy.Infrastructure.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<Interest> Interests { get; set; }
+        public DbSet<Match> Matches { get; set; }
+        public DbSet<Message> Messages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresExtension("postgis");
@@ -141,7 +144,7 @@ namespace Swapzy.Infrastructure.Data
                 entity.HasIndex(x => x.ProductId);
 
                 entity.HasOne(x => x.Product)
-                      .WithMany()
+                      .WithMany(x => x.Images)
                       .HasForeignKey(x => x.ProductId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
@@ -175,6 +178,50 @@ namespace Swapzy.Infrastructure.Data
                       .WithMany()
                       .HasForeignKey(x => x.ProductId)
                       .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Match>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => x.InterestId).IsUnique();
+                entity.HasIndex(x => x.BuyerId);
+                entity.HasIndex(x => x.SellerId);
+
+                entity.HasOne(x => x.Interest)
+                      .WithMany()
+                      .HasForeignKey(x => x.InterestId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(x => x.Buyer)
+                      .WithMany()
+                      .HasForeignKey(x => x.BuyerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.Seller)
+                      .WithMany()
+                      .HasForeignKey(x => x.SellerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.Product)
+                      .WithMany()
+                      .HasForeignKey(x => x.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Message>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => new { x.MatchId, x.CreatedOn });
+
+                entity.HasOne(x => x.Match)
+                      .WithMany()
+                      .HasForeignKey(x => x.MatchId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(x => x.Sender)
+                      .WithMany()
+                      .HasForeignKey(x => x.SenderId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
         }
 

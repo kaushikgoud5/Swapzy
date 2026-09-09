@@ -6,5 +6,5 @@ namespace Swapzy.Core.Enums
 
     public enum ProductStatus { Available, Swapped, Sold, Unavailable }
 
-    public enum InterestStatus { Pending, Responded, Closed }
+    public enum InterestStatus { Pending, Accepted, Rejected }
 }

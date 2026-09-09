@@ -25,6 +25,7 @@ namespace Swapzy.Infrastructure.Repositories
         {
             return await _context.Products
                 .Include(p => p.Location)
+                .Include(p => p.Images.Where(i => i.DateDeleted == null))
                 .FirstOrDefaultAsync(p => p.Id == id && p.DateDeleted == null);
         }
 
@@ -32,6 +33,7 @@ namespace Swapzy.Infrastructure.Repositories
         {
             var query = _context.Products
                 .Include(p => p.Location)
+                .Include(p => p.Images.Where(i => i.DateDeleted == null))
                 .Where(p => p.DateDeleted == null);
 
             if (ownerId.HasValue)
