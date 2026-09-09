@@ -68,7 +68,7 @@ namespace Swapzy.Infrastructure.Services
             await _context.ProductImages.AddAsync(image);
             await _context.SaveChangesAsync();
 
-            var url = await _storageService.GenerateReadUrlAsync(image.S3Key);
+            var url = _storageService.GetPublicUrl(image.S3Key);
 
             return new ProductImageResponseDto
             {
@@ -88,7 +88,7 @@ namespace Swapzy.Infrastructure.Services
             return images.Select(image => new ProductImageResponseDto
             {
                 Id = image.Id,
-                Url = _storageService.GenerateReadUrlAsync(image.S3Key).GetAwaiter().GetResult(),
+                Url = _storageService.GetPublicUrl(image.S3Key),
                 DisplayOrder = image.DisplayOrder
             }).ToList();
         }

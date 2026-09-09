@@ -4,6 +4,7 @@ namespace Swapzy.Application.Interfaces
     {
         Task<string> GenerateUploadUrlAsync(string key, string contentType, int expirationMinutes = 15);
         Task<string> GenerateReadUrlAsync(string key, int expirationMinutes = 60);
+        string GetPublicUrl(string key);
         Task DeleteAsync(string key);
     }
 }
