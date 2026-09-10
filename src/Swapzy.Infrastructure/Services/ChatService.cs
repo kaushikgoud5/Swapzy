@@ -55,8 +55,8 @@ public class ChatService : IChatService
             .OrderBy(m => m.CreatedOn)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(m => ToDto(m))
-            .ToListAsync();
+            .ToListAsync()
+            .ContinueWith(t => t.Result.Select(ToDto).ToList());
     }
 
     private static ChatMessageDto ToDto(Message m) => new()
