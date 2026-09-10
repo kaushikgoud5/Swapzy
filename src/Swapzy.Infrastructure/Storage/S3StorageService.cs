@@ -14,8 +14,8 @@ namespace Swapzy.Infrastructure.Storage
         public S3StorageService(IAmazonS3 s3, IConfiguration configuration)
         {
             _s3 = s3;
-            _bucketName = configuration["AWS:S3BucketName"]!;
-            _cloudFrontDomain = configuration["AWS:CloudFrontDomain"]!;
+            _bucketName = configuration["AWS:S3BucketName"] ?? throw new InvalidOperationException("AWS:S3BucketName is not configured.");
+            _cloudFrontDomain = configuration["AWS:CloudFrontDomain"] ?? throw new InvalidOperationException("AWS:CloudFrontDomain is not configured.");
         }
 
         public Task<string> GenerateUploadUrlAsync(string key, string contentType, int expirationMinutes = 15)
