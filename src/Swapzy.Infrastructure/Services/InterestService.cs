@@ -129,7 +129,6 @@ public class InterestService : IInterestService
         }
 
         await _unitOfWork.SaveChangesAsync();
-        await _context.SaveChangesAsync();
         return _mapper.Map<InterestResponseDto>(interest);
     }
 
